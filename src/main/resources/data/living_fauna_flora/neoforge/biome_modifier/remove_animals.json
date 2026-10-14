@@ -1,0 +1,5 @@
+{
+  "type": "neoforge:remove_spawns",
+  "biomes": { "type": "neoforge:any" },
+  "entity_types": "#living_fauna_flora:removed_animals"
+}

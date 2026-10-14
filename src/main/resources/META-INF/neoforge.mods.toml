@@ -1,0 +1,38 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MPL-2.0"
+
+[[mixins]]
+config = "${mod_id}.mixins.json"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "Cobblemon: Living Fauna & Flora"
+authors = "luiz"
+description = '''
+Os Pokémon passam a ser a fauna do mundo: substituem os animais do Minecraft e convivem com seus habitantes.
+Mercador com Mudbray de manta, vilas com Pokémon nos currais, Golett e Golurk guardiões, aldeões com
+Pokémon, Combee nas colmeias e cachorros caçando esqueletos.
+'''
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.21.2)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "cobblemon"
+type = "required"
+versionRange = "[1.8,)"
+ordering = "AFTER"
+side = "BOTH"

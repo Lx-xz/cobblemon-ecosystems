@@ -1,0 +1,49 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+version = project.mod_version
+group = 'com.luiz.livingfaunaflora'
+base { archivesName = project.archives_base_name }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    maven { url = 'https://maven.impactdev.net/repository/development/' } // Cobblemon
+    maven { url = 'https://thedarkcolour.github.io/KotlinForForge/' }     // Kotlin for Forge (dependência do Cobblemon)
+}
+
+neoForge {
+    version = project.neo_version
+    runs {
+        client { client() }
+        server { server() }
+        // Sobe o jogo sem janela e sem EULA, só para conferir se mods e mixins carregam.
+        gameTestServer {
+            type = 'gameTestServer'
+            gameDirectory = project.file('run-gametest')
+            // Salva em run-gametest/.mixin.out as classes alteradas pelos mixins, para conferir.
+            jvmArgument '-Dmixin.debug.export=true'
+        }
+    }
+    mods {
+        "${mod_id}" { sourceSet sourceSets.main }
+    }
+}
+
+dependencies {
+    // Cobblemon para compilar e para rodar no runClient/runServer.
+    implementation("com.cobblemon:neoforge:${project.cobblemon_version}") { transitive = false }
+    compileOnly 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
+    // Kotlin for Forge: o Cobblemon precisa dele para carregar no runClient/runServer.
+    runtimeOnly 'thedarkcolour:kotlinforforge-neoforge:5.12.0'
+}
+
+processResources {
+    def props = [mod_id: project.mod_id, mod_version: project.mod_version]
+    inputs.properties props
+    filesMatching('META-INF/neoforge.mods.toml') { expand props }
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }

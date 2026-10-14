@@ -1,0 +1,15 @@
+{
+  "species": "cobblemon:mudbray",
+  "order": 1,
+  "variations": [
+    {
+      "aspects": ["living_fauna_flora_trader"],
+      "layers": [
+        {
+          "name": "trader_blanket",
+          "texture": "living_fauna_flora:textures/pokemon/mudbray_trader_blanket.png"
+        }
+      ]
+    }
+  ]
+}
