@@ -45,7 +45,7 @@ public class DogHunters {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-        if (++tick % 20 != 0) return;
+        if (++tick % 20 != 0 || !Config.DOG_HUNTERS.get()) return;
         dogs.removeIf(Entity::isRemoved);
         for (PokemonEntity dog : dogs) {
             if (dog.isBusy() || Hunts.isHunting(dog)) continue;

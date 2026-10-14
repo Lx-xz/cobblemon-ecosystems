@@ -1,40 +1,56 @@
 package com.luiz.cobblemonecosystems;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Entity;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.world.BiomeModifier;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 /**
- * Remove os animais vanilla. Os spawns naturais são tirados dos biomas pelo biome modifier em
- * data/cobblemon_ecosystems/neoforge/biome_modifier; aqui bloqueamos o resto (ovos, reprodução, gatos de vila,
- * animais já salvos em mundos antigos...).
+ * Remove os mobs vanilla escolhidos na configuração ({@link Removal}). Os spawns naturais saem dos biomas pelo
+ * biome modifier {@link Removal.ConfiguredSpawnRemoval}; aqui bloqueamos o resto (ovos, reprodução, gatos de vila,
+ * mobs já salvos em mundos antigos...).
  */
 @Mod(CobblemonEcosystems.MOD_ID)
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class CobblemonEcosystems {
     public static final String MOD_ID = "cobblemon_ecosystems";
 
-    /** Lista editável em data/cobblemon_ecosystems/tags/entity_type/removed_animals.json (ou por datapack). */
-    public static final TagKey<EntityType<?>> REMOVED_ANIMALS =
-            TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "removed_animals"));
+    private static final DeferredRegister<MapCodec<? extends BiomeModifier>> BIOME_MODIFIERS =
+            DeferredRegister.create(NeoForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, MOD_ID);
+    static {
+        BIOME_MODIFIERS.register("remove_configured_spawns", () -> Removal.ConfiguredSpawnRemoval.CODEC);
+    }
 
-    public CobblemonEcosystems() {
+    public CobblemonEcosystems(IEventBus modBus, ModContainer container) {
+        container.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        BIOME_MODIFIERS.register(modBus);
         TraderBattle.registerCobblemonEvents();
+        VillagerBattles.registerCobblemonEvents();
     }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
-        if (event.getLevel() instanceof ServerLevel level && event.getEntity().getType().is(REMOVED_ANIMALS)) {
-            event.setCanceled(true);
-            StructurePokemon.replaceIfMarked(event.getEntity(), level);
-            VillageGuardians.replaceIfMarked(event.getEntity(), level);
-            HivePokemon.replaceIfFromHive(event.getEntity(), level);
-        }
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+        Entity entity = event.getEntity();
+        if (!Removal.shouldRemove(entity.getType())) return;
+        // Mobs já salvos no mundo podem ficar, se a configuração mandar. Os de estrutura marcados para virar
+        // Pokémon também vêm "do disco" (o chunk novo é salvo antes de carregar), e esses sempre são trocados.
+        boolean marked = StructurePokemon.isMarked(entity) || VillageGuardians.isMarked(entity);
+        if (event.loadedFromDisk() && !marked && !Config.REMOVE_FROM_EXISTING_WORLDS.get()) return;
+
+        event.setCanceled(true);
+        StructurePokemon.replaceIfMarked(entity, level);
+        VillageGuardians.replaceIfMarked(entity, level);
+        HivePokemon.replaceIfFromHive(entity, level);
     }
 }

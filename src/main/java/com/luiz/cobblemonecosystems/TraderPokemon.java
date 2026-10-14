@@ -32,6 +32,12 @@ public class TraderPokemon {
     /** Aspect que liga a camada da manta no resolver 1_cobblemon_ecosystems_trader.json. */
     private static final String BLANKET_ASPECT = "cobblemon_ecosystems_trader";
     private static final String OWNER_KEY = CobblemonEcosystems.MOD_ID + ":trader";
+    /**
+     * 1 em cada 512 mercadores é "shiny": a roupa dele e as mantas ficam com as cores invertidas (dourado no
+     * lugar do azul) e os dois Mudbray vêm shiny. O sorteio sai do UUID do mercador, que o cliente também
+     * conhece: assim ele sabe qual textura desenhar sem precisar de mensagem do servidor.
+     */
+    private static final int SHINY_CHANCE = 512;
 
     private static final List<WanderingTrader> newTraders = new ArrayList<>();
     private static final Set<PokemonEntity> owned = new HashSet<>();
@@ -42,7 +48,7 @@ public class TraderPokemon {
         if (!(event.getLevel() instanceof ServerLevel)) return;
         Entity entity = event.getEntity();
 
-        if (entity instanceof WanderingTrader trader && !event.loadedFromDisk()) {
+        if (entity instanceof WanderingTrader trader && !event.loadedFromDisk() && Config.TRADER_POKEMON.get()) {
             // Não dá para criar entidades no meio deste evento; fica para o fim do tick.
             newTraders.add(trader);
         } else if (entity instanceof PokemonEntity pokemon && pokemon.getPersistentData().hasUUID(OWNER_KEY)) {
@@ -63,7 +69,8 @@ public class TraderPokemon {
     private static void spawnPackPokemon(WanderingTrader trader) {
         ServerLevel level = (ServerLevel) trader.level();
         for (int i = 0; i < COUNT; i++) {
-            PokemonEntity pokemon = PokemonProperties.Companion.parse(PROPERTIES).createEntity(level);
+            String shiny = isShinyTrader(trader.getUUID()) ? " shiny=true" : " shiny=false";
+            PokemonEntity pokemon = PokemonProperties.Companion.parse(PROPERTIES + shiny).createEntity(level);
             pokemon.getPokemon().setForcedAspects(new HashSet<>(Set.of(BLANKET_ASPECT)));
             pokemon.getPokemon().updateAspects();
             pokemon.getPokemon().setNickname(Component.translatable(NAME));
@@ -79,6 +86,12 @@ public class TraderPokemon {
                 owned.add(pokemon);
             }
         }
+    }
+
+    /** Se este mercador é o "shiny" (veja {@link #SHINY_CHANCE}). Usado também pelo cliente, para a textura. */
+    public static boolean isShinyTrader(UUID trader) {
+        return Config.TRADER_POKEMON.get()
+                && Math.floorMod(trader.getMostSignificantBits() ^ trader.getLeastSignificantBits(), SHINY_CHANCE) == 0;
     }
 
     /** Os Pokémon de carga deste mercador que estão carregados no mundo. */

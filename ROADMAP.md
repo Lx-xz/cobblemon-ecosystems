@@ -19,8 +19,19 @@ Legenda: `[x]` feito · `[ ]` a fazer · **(decidir)** precisa de decisão antes
 - [x] Batalha contra o mercador (agachar + clique, ou lançar Pokémon nele ou nos Mudbray)
 - [x] Mercador parado e Mudbray escondidos durante a batalha
 - [x] Vencer o mercador libera a captura de um Mudbray (skin de manta mantida após captura e evolução)
+- [x] Mercador shiny (1 em 512): roupa e mantas roxas com detalhes pretos, Mudbray shiny
 - [x] Animais de estruturas (currais, estábulos, camelos do deserto, gatos de vila e da bruxa) viram Pokémon
 - [x] Mesmo cercado = mesma espécie; 20% de chance de vir evoluído
+- [x] **Pokémon dos cercados por tipo de vila** (bioma): cavalos viram Mudbray na planície, Ponyta no deserto,
+      Blitzle na savana, Stantler na neve e Deerling na taiga; o mesmo para vacas, porcos, ovelhas, galinhas e gatos
+- [x] **Uma espécie por vila** (não por cercado): uma vila tem Miltank, outra Tauros; espécies raras com peso menor
+- [x] Galinhas viram aves que **botam ovos** (Doduo e Psyduck comuns; Torchic raro, muito raro na savana; Piplup muito
+      raro na neve); um ovo a cada 5 a 10 minutos, como a galinha
+- [ ] **Aldeões pastoreando os Pokémon**, não só trocar animal por Pokémon: pastor escova e tosquia Wooloo e Mareep,
+      fazendeiro ordenha Miltank e recolhe os ovos, Pokémon dos cercados comem feno e seguem o aldeão no horário de trabalho
+- [ ] Pokémon dos cercados da vila **incapturáveis**, com uma missão para ganhar um (ex.: vencer o Combusken do
+      fazendeiro para levar um Torchic), em vez de vários de graça
+- [x] Variantes shiny próprias para as formas Candyan (gomas em tons vizinhos: ciano, magenta, menta, pêssego, limão, lilás; Orthworm de bala de hortelã listrada)
 - [x] **Golett e Golurk no lugar do golem de ferro** (nascem com a vila e quando os aldeões chamam um golem; atacam mobs hostis menos creepers; não se afastam de casa; incapturáveis)
 - [x] Golem de ferro não pode mais ser montado com abóbora (o de neve continua)
 - [x] **Aldeões com Pokémon** (20% dos aldeões nascidos com a vila; por profissão; Honedge mais raro; pequenos ficam na cabeça)
@@ -39,9 +50,9 @@ Legenda: `[x]` feito · `[ ]` a fazer · **(decidir)** precisa de decisão antes
 ## 1. Base do mod
 
 - [x] Renomear para **Cobblemon Ecosystems** (mod id `cobblemon_ecosystems`, pacote `com.luiz.cobblemonecosystems`)
-- [ ] Arquivo de configuração simples para o jogador escolher (ver seção 1.1)
+- [x] Arquivo de configuração simples para o jogador escolher (ver seção 1.1)
 
-### 1.1 Configuração (`config/cobblemon_ecosystems.toml`)
+### 1.1 Configuração (`config/cobblemon_ecosystems-common.toml`)
 
 Rascunho das opções. Cada grupo é uma tag editável, então dá para ajustar mob por mob com datapack.
 
@@ -64,13 +75,13 @@ chance_evoluido = 0.2
 # um liga/desliga por mecânica: abelhas, gatos, sapos, pasto...
 ```
 
-- [ ] Grupos de remoção: passivos, hostis e slimes (slime + magma cube)
-- [ ] Liga/desliga para cada módulo (mercador, estruturas, pastos, cada comportamento)
-- [ ] Recarregar sem reiniciar o servidor, se possível
-- [ ] Explicar cada opção em comentários no próprio arquivo
-- [ ] Traduções (pt_br e en_us) em vez de textos fixos no código
+- [x] Grupos de remoção: passivos, hostis e slimes (slime + magma cube), cada um com sua tag
+- [x] Liga/desliga para cada módulo (estruturas, guardiões, aldeões, mercador, batalha, colmeias, cachorros) e as chances
+- [x] Recarregar sem reiniciar: vale na hora, menos os spawns naturais nos biomas (ao reabrir o mundo)
+- [x] Explicar cada opção em comentários no próprio arquivo (inglês e português)
+- [x] Traduções (pt_br e en_us) em vez de textos fixos no código (falas e nomes do mercador)
 - [ ] Testar em servidor dedicado (não só no singleplayer)
-- [ ] Página do mod (descrição, imagens, lista de dependências)
+- [x] Página do mod no Modrinth (descrição, changelog, imagens, dependências) — versão 1.0.0
 
 ---
 
@@ -89,7 +100,7 @@ mecânica sem substituto, ficam.
 | Slime / Magma Cube | **Opção na configuração** (`slimes`, desligada por padrão) | Monstros; Grimer, Goomy e Solosis dão slimeball; Slugma, Magcargo, Numel, Camerupt e Heatran dão creme de magma |
 | Traça (silverfish) | **(decidir)** | Tem contraparte: Pokémon inseto que vivem na pedra (ver abaixo) |
 
-- [ ] Opção `slimes` na configuração (slime e magma cube juntos)
+- [x] Opção `remove_slimes` na configuração (slime e magma cube juntos, desligada por padrão)
 - [ ] Traça → **Dwebble** nos blocos infestados (decidido: Nincada é raro demais para a quantidade de traças)
   - Dwebble é um inseto que mora dentro de uma pedra, combina com "bloco infestado"
   - Funcionaria assim: quebrar um bloco infestado faz sair um Nincada selvagem e bravo, e os outros
@@ -295,13 +306,32 @@ Teste rápido no jogo:
     do Minecraft (o Pokémon "monta" no aldeão), que é o mesmo das galinhas jóquei. Precisa testar a
     posição e como fica a IA do aldeão
 - [ ] Pokémon do aldeão ajudam na profissão (Timburr carrega blocos, Bulbasaur acelera plantações)
-- [ ] O jogador pode batalhar com o aldeão, como com o mercador
+- [x] **Batalha com aldeões** (agachar + clique direito, ou lançar Pokémon no aldeão ou no pet), como a do mercador
+  - Personalidade por aldeão (pacífico, amigável, competitivo, desafiador), sorteada pela profissão: os pacíficos e as
+    crianças recusam; os desafiadores têm Pokémon mais fortes e até 2 a mais no time (só um aparece)
+  - Durante a batalha o pet vai para a Pokébola e uma cópia batalha
+  - Vencer: desconto nas trocas (reputação permanente + temporária); aldeões sem profissão dão esmeraldas
+  - Descanso: 2 dias na Pokébola; com máquina de cura do Cobblemon por perto, o aldeão leva o pet até ela, o pet volta
+    na hora e outra batalha só 1 dia depois
+- [x] Pet do aldeão protegido: não entra em batalha selvagem e não leva dano de jogadores
+- [x] Pet teleporta para o aldeão a 16 blocos; aldeão faz carinho no pet de vez em quando (corações)
+- [x] Pet defende o aldeão de monstros; derrotado, vai para a Pokébola e descansa (não morre)
+- [x] Aldeão que vira zumbi guarda o pet; curado, o pet volta
+- [x] Pet que some de verdade (só pelo /kill): o aldeão adota outro depois de 3 dias
+- [ ] Guardiões (Golett, Golurk) desafiáveis como "guardião da vila" (por enquanto não)
+- [ ] **Nomes de aldeões**: cada aldeão com pet ganha um nome ("Ash, o Ferreiro") e o pet leva o nome dele
+      ("Aron do Ash"), para saber qual Pokémon é de qual aldeão
+- [ ] Máquina de cura: tocar a animação e o som de cura de verdade quando o aldeão cura o pet (hoje só partículas e um som)
 - [ ] Aldeões de reprodução também adotarem (mais tarde)
 
 ### 8.1 Saqueadores (illagers) com Pokémon
 - [ ] Saqueadores com Houndour, Houndoom ou Mightyena (cães sombrios)
 - [ ] Vindicadores com Pawniard ou Bisharp (lâminas, combinam com o machado)
 - [ ] Bruxas com Murkrow, Honchkrow ou Mismagius
+- [x] Gato da cabana da bruxa vira **Purrloin** (ou Liepard)
+- [x] Purrloin/Liepard da bruxa com textura de gato preto e olhos laranja (shiny: branco de olhos roxos)
+- [ ] Purrloin como pet da bruxa
+- [ ] Bruxa da cabana neutra e desafiável: vencer dá o Purrloin dela
 - [ ] Ilusionista com Zorua ou Zoroark (Pokémon da ilusão)
 - [ ] Evocador com Shuppet ou Gastly
 - [ ] **(decidir)** Devastador → **Rhyhorn / Rhydon**: rinoceronte de pedra, parecido com o devastador, que

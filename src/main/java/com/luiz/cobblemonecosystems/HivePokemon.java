@@ -163,7 +163,7 @@ public class HivePokemon {
         workers.entrySet().removeIf(entry -> entry.getKey().isRemoved());
         for (Map.Entry<PokemonEntity, Worker> entry : List.copyOf(workers.entrySet())) work(entry.getKey(), entry.getValue());
         releaseRested(event.getServer());
-        if (tick % 600 == 0) findHomes();
+        if (tick % 600 == 0 && Config.HIVE_POKEMON.get()) findHomes();
     }
 
     // ----- Nascer das abelhas -----
@@ -175,6 +175,8 @@ public class HivePokemon {
         int bees = hive.getOccupantCount();
         if (bees == 0) return;
         emptyVanillaBees(p.level(), hive);
+        // Com o módulo desligado, a colmeia só é esvaziada (senão ficaria tentando soltar a abelha para sempre).
+        if (!Config.HIVE_POKEMON.get()) return;
 
         long now = p.level().getGameTime();
         RandomSource random = p.level().random;

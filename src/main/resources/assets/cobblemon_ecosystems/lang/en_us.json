@@ -7,5 +7,16 @@
   "cobblemon_ecosystems.trader.no_pokemon": "I don't have any Pokémon to battle right now.",
   "cobblemon_ecosystems.trader.party_fainted": "Your Pokémon are too tired to battle.",
   "cobblemon_ecosystems.trader.not_your_prize": "This Mudbray is someone else's prize!",
-  "cobblemon_ecosystems.trader.wants_to_battle": "The Wandering Trader wants to battle you!"
+  "cobblemon_ecosystems.trader.wants_to_battle": "The Wandering Trader wants to battle you!",
+  "cobblemon_ecosystems.villager.challenge_villager": "This Pokémon belongs to a villager. Challenge the villager instead!",
+  "cobblemon_ecosystems.villager.challenge_friendly": "A friendly battle? Sure, let's have fun!",
+  "cobblemon_ecosystems.villager.challenge_competitive": "Let's see what you've got!",
+  "cobblemon_ecosystems.villager.challenge_challenger": "Finally a worthy opponent! I won't hold back.",
+  "cobblemon_ecosystems.villager.refuse_peaceful": "My Pokémon doesn't like to fight.",
+  "cobblemon_ecosystems.villager.refuse_baby": "I'm too little to battle!",
+  "cobblemon_ecosystems.villager.tired": "My Pokémon needs to rest. Come back later.",
+  "cobblemon_ecosystems.villager.party_fainted": "Your Pokémon are too tired to battle.",
+  "cobblemon_ecosystems.villager.win_discount": "You won! For you, my trades are cheaper now.",
+  "cobblemon_ecosystems.villager.win_emeralds": "You won! Here, take these emeralds.",
+  "cobblemon_ecosystems.villager.lose": "Ha! Better luck next time."
 }

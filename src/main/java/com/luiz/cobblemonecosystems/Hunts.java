@@ -9,6 +9,8 @@ import com.cobblemon.mod.common.api.moves.Move;
 import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -18,10 +20,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
+import org.joml.Vector3f;
 
 /**
  * Caçada controlada pelo mod, usando os golpes do próprio Pokémon:
@@ -104,13 +109,16 @@ public final class Hunts {
             damage = Math.max(damage, (float) move.getPower() / 8f * levelFactor * bonus);
         }
 
-        if (special) trail(level, hunter, target, particle(typeName));
+        if (special) trail(level, hunter, target, typeColor(typeName));
         if (target.hurt(level.damageSources().mobAttack(hunter), damage)) {
             Vec3 push = target.position().subtract(hunter.position()).normalize().scale(0.4);
             target.push(push.x, hunt.knockUp(), push.z);
             target.hurtMarked = true;
             typeEffect(target, typeName);
         }
+        // Impacto: a partícula do tipo e uma explosão de pó na cor do tipo.
+        level.sendParticles(typeColor(typeName), target.getX(), target.getY(0.5), target.getZ(), 10,
+                target.getBbWidth() / 2, target.getBbHeight() / 3, target.getBbWidth() / 2, 0.05);
         level.sendParticles(particle(typeName), target.getX(), target.getY(0.5), target.getZ(), 12,
                 target.getBbWidth() / 2, target.getBbHeight() / 3, target.getBbWidth() / 2, 0.05);
         level.playSound(null, target.getX(), target.getY(), target.getZ(), sound(typeName, special), SoundSource.NEUTRAL, 0.8f,
@@ -133,7 +141,7 @@ public final class Hunts {
         return false;
     }
 
-    /** Rastro de partículas do Pokémon até o alvo, para golpes especiais. */
+    /** Rastro de partículas do Pokémon até o alvo, para golpes especiais, na cor do tipo. */
     private static void trail(ServerLevel level, PokemonEntity hunter, LivingEntity target, ParticleOptions particle) {
         Vec3 from = hunter.getEyePosition();
         Vec3 to = target.position().add(0, target.getBbHeight() / 2, 0);
@@ -153,6 +161,31 @@ public final class Hunts {
         }
     }
 
+    /** Pó na cor oficial do tipo (as mesmas cores dos jogos). */
+    private static ParticleOptions typeColor(String type) {
+        int rgb = switch (type) {
+            case "fire" -> 0xEE8130;
+            case "water" -> 0x6390F0;
+            case "electric" -> 0xF7D02C;
+            case "grass" -> 0x7AC74C;
+            case "ice" -> 0x96D9D6;
+            case "fighting" -> 0xC22E28;
+            case "poison" -> 0xA33EA1;
+            case "ground" -> 0xE2BF65;
+            case "flying" -> 0xA98FF3;
+            case "psychic" -> 0xF95587;
+            case "bug" -> 0xA6B91A;
+            case "rock" -> 0xB6A136;
+            case "ghost" -> 0x735797;
+            case "dragon" -> 0x6F35FC;
+            case "dark" -> 0x705746;
+            case "steel" -> 0xB7B7CE;
+            case "fairy" -> 0xD685AD;
+            default -> 0xA8A77A; // normal
+        };
+        return new DustParticleOptions(new Vector3f(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f), 1.3f);
+    }
+
     private static ParticleOptions particle(String type) {
         return switch (type) {
             case "fire" -> ParticleTypes.FLAME;
@@ -161,7 +194,8 @@ public final class Hunts {
             case "electric" -> ParticleTypes.ELECTRIC_SPARK;
             case "ice" -> ParticleTypes.SNOWFLAKE;
             case "poison" -> ParticleTypes.WITCH;
-            case "ground", "rock" -> ParticleTypes.POOF;
+            case "ground" -> new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COARSE_DIRT.defaultBlockState());
+            case "rock" -> new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COBBLESTONE.defaultBlockState());
             case "flying" -> ParticleTypes.CLOUD;
             case "psychic" -> ParticleTypes.PORTAL;
             case "ghost" -> ParticleTypes.SOUL;

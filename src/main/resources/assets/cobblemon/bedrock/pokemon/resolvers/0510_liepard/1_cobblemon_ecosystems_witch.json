@@ -1,0 +1,14 @@
+{
+  "species": "cobblemon:liepard",
+  "order": 1,
+  "variations": [
+    {
+      "aspects": ["ecosystems_witch"],
+      "texture": "cobblemon_ecosystems:textures/pokemon/liepard_witch.png"
+    },
+    {
+      "aspects": ["ecosystems_witch", "shiny"],
+      "texture": "cobblemon_ecosystems:textures/pokemon/liepard_witch_shiny.png"
+    }
+  ]
+}

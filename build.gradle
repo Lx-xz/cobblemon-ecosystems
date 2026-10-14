@@ -22,7 +22,11 @@ repositories {
 neoForge {
     version = project.neo_version
     runs {
-        client { client() }
+        client {
+            client()
+            // Nome do jogador no jogo de teste (servidor offline aceita qualquer nome).
+            programArguments.addAll('--username', 'Luiz')
+        }
         server { server() }
         // Sobe o jogo sem janela e sem EULA, só para conferir se mods e mixins carregam.
         gameTestServer {
@@ -65,3 +69,6 @@ tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 tasks.named('jar') {
     doFirst { delete fileTree(destinationDirectory) { include "${project.archives_base_name}-*.jar" } }
 }
+
+// Repassa o teclado para o console do runServer (sem isso não dá para digitar comandos nele).
+tasks.matching { it.name == 'runServer' }.configureEach { standardInput = System.in }

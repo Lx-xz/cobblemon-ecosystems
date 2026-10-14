@@ -1,5 +1,7 @@
 package com.luiz.cobblemonecosystems;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -8,42 +10,70 @@ import java.util.Set;
 import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.LivingConversionEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * Alguns aldeões nascidos com a vila (não os de reprodução) adotam um Pokémon que combina com a profissão.
- * Pokémon pequenos andam em cima da cabeça do aldeão; os outros seguem ele por aí.
+ * - Pokémon pequenos andam em cima da cabeça do aldeão; os outros seguem ele e são teleportados se ficarem longe.
+ * - Cada aldeão tem uma personalidade: os mais desafiadores têm Pokémon mais fortes e um time maior (só um aparece).
+ * - De vez em quando o aldeão faz carinho no Pokémon.
+ * - O Pokémon é protegido: jogadores não machucam ele (para batalhar, desafie o aldeão: {@link VillagerBattles}).
+ * - O Pokémon defende o aldeão de monstros. Derrotado, vai para a Pokébola e descansa; não morre.
+ * - Aldeão que vira zumbi guarda o Pokémon; curado, solta ele de novo.
+ * - Se o Pokémon sumir de outro jeito (/kill), o aldeão adota outro depois de alguns dias.
  *
  * Para testar: /summon minecraft:villager ~ ~ ~ {NeoForgeData:{"cobblemon_ecosystems:adopt":1b,"cobblemon_ecosystems:adopt_species":"pichu"}}
  */
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class VillagerCompanions {
-    /** Chance de um aldeão da vila ter um Pokémon. */
-    private static final float ADOPT_CHANCE = 0.5f;
     /** Chance de o Pokémon ser um "qualquer um" (segue o aldeão sem ligação com a profissão). */
     private static final float GENERIC_CHANCE = 0.2f;
     /** Honedge é o mais diferente: o ferreiro de armas só fica com ele nessa fração das vezes. */
     private static final float HONEDGE_CHANCE = 0.35f;
+    // Os tempos usam o horário do dia (getDayTime): dormir e o /time contam, como o jogador espera de "dias".
     /** Sem profissão até este tempo (2 dias do jogo), adota mesmo assim. */
     private static final long MAX_WAIT_FOR_JOB = 48000;
+    /** Longe assim do aldeão, o Pokémon é teleportado para perto dele. */
+    private static final double TELEPORT_DISTANCE = 16;
+    /** Pokémon sumido (e não guardado na Pokébola) por esse tempo (3 dias): o aldeão adota outro. */
+    private static final long READOPT_AFTER = 72000;
+    /** Monstros a essa distância do aldeão são atacados pelo pet. */
+    private static final double DEFEND_RANGE = 10;
+    /** Chance, a cada 2 segundos com os dois perto, de o aldeão fazer carinho no Pokémon. */
+    private static final float PET_CHANCE = 1f / 12;
 
     private static final List<String> GENERIC = List.of("pidgey", "pichu");
     private static final List<String> BABY = List.of("pichu", "togepi");
     private static final List<String> NO_JOB = List.of("slowpoke", "psyduck");
-    private static final Map<VillagerProfession, List<String>> BY_PROFESSION = Map.ofEntries(
+    static final Map<VillagerProfession, List<String>> BY_PROFESSION = Map.ofEntries(
             Map.entry(VillagerProfession.ARMORER, List.of("aron", "aron", "lairon")),
             Map.entry(VillagerProfession.WEAPONSMITH, List.of("honedge")),
             Map.entry(VillagerProfession.TOOLSMITH, List.of("klefki", "roggenrola")),
@@ -61,23 +91,66 @@ public class VillagerCompanions {
             Map.entry(VillagerProfession.NONE, NO_JOB)
     );
     /** Pequenos o bastante para andar na cabeça do aldeão. */
-    private static final Set<String> HEAD_RIDERS = Set.of("pichu", "pidgey", "natu", "rowlet", "togepi");
+    static final Set<String> HEAD_RIDERS = Set.of("pichu", "pidgey", "natu", "rowlet", "togepi");
 
-    private static final String ADOPT_KEY = CobblemonEcosystems.MOD_ID + ":adopt";
+    /** Quão desafiador o aldeão é: decide se aceita batalhas, a força e o tamanho do time. */
+    enum Personality {
+        PEACEFUL(5, 15, 0, 0), FRIENDLY(10, 20, 0, 2), COMPETITIVE(20, 35, 1, 3), CHALLENGER(35, 50, 2, 4);
+
+        final int minLevel, maxLevel, extraPokemon, battleSkill;
+
+        Personality(int minLevel, int maxLevel, int extraPokemon, int battleSkill) {
+            this.minLevel = minLevel;
+            this.maxLevel = maxLevel;
+            this.extraPokemon = extraPokemon;
+            this.battleSkill = battleSkill;
+        }
+
+        boolean battles() {
+            return this != PEACEFUL;
+        }
+
+        int rollLevel(RandomSource random) {
+            return minLevel + random.nextInt(maxLevel - minLevel + 1);
+        }
+    }
+
+    /** Pesos de PEACEFUL, FRIENDLY, COMPETITIVE e CHALLENGER: quem trabalha com armas e obras gosta mais de batalhar. */
+    private static int[] personalityWeights(VillagerProfession profession) {
+        if (profession == VillagerProfession.WEAPONSMITH || profession == VillagerProfession.ARMORER
+                || profession == VillagerProfession.FLETCHER || profession == VillagerProfession.MASON
+                || profession == VillagerProfession.TOOLSMITH) return new int[] {10, 30, 40, 20};
+        if (profession == VillagerProfession.CLERIC || profession == VillagerProfession.LIBRARIAN
+                || profession == VillagerProfession.CARTOGRAPHER) return new int[] {70, 25, 5, 0};
+        if (profession == VillagerProfession.NONE || profession == VillagerProfession.NITWIT) return new int[] {40, 40, 15, 5};
+        return new int[] {30, 40, 25, 5}; // fazendeiro, pastor, pescador, açougueiro, curtumeiro
+    }
+
+    static final String ADOPT_KEY = CobblemonEcosystems.MOD_ID + ":adopt";
     private static final String ADOPT_SPECIES_KEY = CobblemonEcosystems.MOD_ID + ":adopt_species";
     private static final String ADOPT_SINCE_KEY = CobblemonEcosystems.MOD_ID + ":adopt_since";
-    private static final String COMPANION_KEY = CobblemonEcosystems.MOD_ID + ":companion";
-    private static final String VILLAGER_KEY = CobblemonEcosystems.MOD_ID + ":villager";
+    /** No aldeão: o Pokémon que aparece, a personalidade, o resto do time e quando viu o Pokémon pela última vez. */
+    static final String COMPANION_KEY = CobblemonEcosystems.MOD_ID + ":companion";
+    static final String PERSONALITY_KEY = CobblemonEcosystems.MOD_ID + ":personality";
+    static final String TEAM_KEY = CobblemonEcosystems.MOD_ID + ":team";
+    private static final String PET_SEEN_KEY = CobblemonEcosystems.MOD_ID + ":pet_seen";
+    /** No aldeão: o Pokémon guardado na Pokébola (descansando depois de uma batalha). */
+    static final String STORED_PET_KEY = CobblemonEcosystems.MOD_ID + ":stored_pet";
+    /** No Pokémon: o aldeão dono dele. */
+    static final String VILLAGER_KEY = CobblemonEcosystems.MOD_ID + ":villager";
 
     private static final Set<Villager> waiting = new HashSet<>();
+    private static final Set<Villager> owners = new HashSet<>();
     private static final Set<PokemonEntity> companions = new HashSet<>();
+    /** Aldeões curados (eram zumbis) que soltam o pet no próximo tick. */
+    private static final List<Villager> toRelease = new ArrayList<>();
     private static int tick;
 
     /** Só aldeões criados junto com a vila podem adotar. */
     @SubscribeEvent
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
         if (event.getEntity().getType() == EntityType.VILLAGER && event.getSpawnType() == MobSpawnType.STRUCTURE
-                && event.getLevel().getRandom().nextFloat() < ADOPT_CHANCE) {
+                && Config.VILLAGER_POKEMON.get() && event.getLevel().getRandom().nextFloat() < Config.VILLAGER_ADOPT_CHANCE.get()) {
             event.getEntity().getPersistentData().putBoolean(ADOPT_KEY, true);
         }
     }
@@ -85,9 +158,9 @@ public class VillagerCompanions {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         if (!(event.getLevel() instanceof ServerLevel)) return;
-        if (event.getEntity() instanceof Villager villager && villager.getPersistentData().getBoolean(ADOPT_KEY)
-                && !villager.getPersistentData().hasUUID(COMPANION_KEY)) {
-            waiting.add(villager);
+        if (event.getEntity() instanceof Villager villager) {
+            if (villager.getPersistentData().hasUUID(COMPANION_KEY)) owners.add(villager);
+            else if (villager.getPersistentData().getBoolean(ADOPT_KEY)) waiting.add(villager);
         } else if (event.getEntity() instanceof PokemonEntity pokemon && pokemon.getPersistentData().hasUUID(VILLAGER_KEY)) {
             PokemonAi.markAsVillagePokemon(pokemon); // também corrige nomes antigos
             companions.add(pokemon);
@@ -95,31 +168,34 @@ public class VillagerCompanions {
     }
 
     /**
-     * O aldeão passa por lugares com menos de 3 blocos de altura, e quem está na cabeça dele ficaria dentro do
-     * bloco. Pokémon de aldeão não sufocam.
+     * Pokémon de aldeão não sufocam (quem está na cabeça entra no bloco quando o aldeão passa por lugares baixos)
+     * e não levam dano de jogadores: para batalhar com eles, desafie o aldeão.
      */
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
-        if (event.getEntity() instanceof PokemonEntity pokemon && event.getSource().is(DamageTypes.IN_WALL)
-                && pokemon.getPersistentData().hasUUID(VILLAGER_KEY)) {
+        if (event.getEntity() instanceof PokemonEntity pokemon && pokemon.getPersistentData().hasUUID(VILLAGER_KEY)
+                && (event.getSource().is(DamageTypes.IN_WALL) || event.getSource().getEntity() instanceof Player)) {
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+        for (Villager villager : List.copyOf(toRelease)) releasePet(villager);
+        toRelease.clear();
         if (++tick % 40 != 0) return;
 
         waiting.removeIf(villager -> {
             if (villager.isRemoved() || villager.getPersistentData().hasUUID(COMPANION_KEY)) return true;
             ServerLevel level = (ServerLevel) villager.level();
-            if (!villager.getPersistentData().contains(ADOPT_SINCE_KEY)) {
-                villager.getPersistentData().putLong(ADOPT_SINCE_KEY, level.getGameTime());
+            if (!villager.getPersistentData().contains(ADOPT_SINCE_KEY)
+                    || villager.getPersistentData().getLong(ADOPT_SINCE_KEY) > level.getDayTime()) {
+                villager.getPersistentData().putLong(ADOPT_SINCE_KEY, level.getDayTime());
             }
             // Espera o aldeão arrumar emprego, para o Pokémon combinar com a profissão.
             boolean forced = villager.getPersistentData().contains(ADOPT_SPECIES_KEY);
             boolean hasJob = villager.getVillagerData().getProfession() != VillagerProfession.NONE;
-            boolean waitedEnough = level.getGameTime() - villager.getPersistentData().getLong(ADOPT_SINCE_KEY) > MAX_WAIT_FOR_JOB;
+            boolean waitedEnough = level.getDayTime() - villager.getPersistentData().getLong(ADOPT_SINCE_KEY) > MAX_WAIT_FOR_JOB;
             if (!forced && !hasJob && !villager.isBaby() && !waitedEnough) return false;
             adopt(villager, level);
             return true;
@@ -128,27 +204,109 @@ public class VillagerCompanions {
         companions.removeIf(pokemon -> {
             if (pokemon.isRemoved()) return true;
             ServerLevel level = (ServerLevel) pokemon.level();
-            Entity villager = level.getEntity(pokemon.getPersistentData().getUUID(VILLAGER_KEY));
+            Entity entity = level.getEntity(pokemon.getPersistentData().getUUID(VILLAGER_KEY));
             // Aldeão morreu ou virou zumbi: o Pokémon vai embora junto.
-            if (!(villager instanceof Villager) || !villager.isAlive()) {
+            if (!(entity instanceof Villager villager) || !villager.isAlive()) {
                 pokemon.discard();
                 return true;
             }
-            if (pokemon.isPassenger() || pokemon.isBusy()) return false;
-            double distance = pokemon.distanceTo(villager);
-            if (distance > 24) {
-                pokemon.teleportTo(villager.getX(), villager.getY(), villager.getZ());
-            } else if (distance > 5) {
-                PokemonAi.walkTo(pokemon, villager, 0.5f, 3);
+            villager.getPersistentData().putLong(PET_SEEN_KEY, level.getDayTime());
+            if (pokemon.isBusy() || Hunts.isHunting(pokemon)) return false;
+            if (defend(villager, pokemon)) return false;
+            // Quem anda na cabeça desceu para lutar: sobe de novo quando estiver perto.
+            if (!pokemon.isPassenger() && HEAD_RIDERS.contains(PokemonAi.species(pokemon)) && pokemon.distanceTo(villager) < 3) {
+                pokemon.startRiding(villager, true);
             }
+            if (!pokemon.isPassenger()) {
+                double distance = pokemon.distanceTo(villager);
+                if (distance > TELEPORT_DISTANCE) {
+                    pokemon.teleportTo(villager.getX(), villager.getY(), villager.getZ());
+                } else if (distance > 5) {
+                    PokemonAi.walkTo(pokemon, villager, 0.5f, 3);
+                }
+            }
+            maybePet(level, villager, pokemon);
             return false;
+        });
+
+        // Pokémon sumido há dias (e não guardado descansando): o aldeão adota outro.
+        owners.removeIf(villager -> {
+            if (villager.isRemoved()) return true;
+            CompoundTag data = villager.getPersistentData();
+            if (!data.hasUUID(COMPANION_KEY)) return true;
+            long now = villager.level().getDayTime();
+            if (!data.contains(PET_SEEN_KEY) || data.getLong(PET_SEEN_KEY) > now) data.putLong(PET_SEEN_KEY, now);
+            if (data.contains(STORED_PET_KEY) || now - data.getLong(PET_SEEN_KEY) < READOPT_AFTER) return false;
+            for (String key : List.of(COMPANION_KEY, PET_SEEN_KEY, TEAM_KEY, ADOPT_SINCE_KEY)) data.remove(key);
+            data.putBoolean(ADOPT_KEY, true);
+            waiting.add(villager);
+            return true;
         });
     }
 
+    /** O Pokémon ataca monstros (menos creepers) que miram o aldeão ou chegam perto dele. */
+    private static boolean defend(Villager villager, PokemonEntity pokemon) {
+        Mob enemy = villager.level().getEntitiesOfClass(Mob.class, villager.getBoundingBox().inflate(DEFEND_RANGE),
+                        mob -> mob instanceof Enemy && !(mob instanceof Creeper) && mob.isAlive()
+                                && (mob.getTarget() == villager || mob.distanceTo(villager) < 6))
+                .stream().min(Comparator.comparingDouble(villager::distanceToSqr)).orElse(null);
+        if (enemy == null) return false;
+        pokemon.stopRiding();
+        Hunts.start(pokemon, enemy, 3f + pokemon.getPokemon().getLevel() / 5f, 0.2, 20);
+        return true;
+    }
+
+    /**
+     * Pet derrotado não morre: vai para a Pokébola e descansa, como depois de uma batalha (o aldeão pode levar
+     * até a máquina de cura). Só o /kill mata de verdade (útil para testar a adoção de outro pet).
+     */
+    @SubscribeEvent
+    public static void onDeath(LivingDeathEvent event) {
+        if (!(event.getEntity() instanceof PokemonEntity pokemon) || !pokemon.getPersistentData().hasUUID(VILLAGER_KEY)
+                || event.getSource().is(DamageTypes.GENERIC_KILL) || !(pokemon.level() instanceof ServerLevel level)) return;
+        if (!(level.getEntity(pokemon.getPersistentData().getUUID(VILLAGER_KEY)) instanceof Villager villager)) return;
+        event.setCanceled(true);
+        pokemon.setHealth(1f);
+        storePet(villager, pokemon);
+        VillagerBattles.startRest(villager);
+    }
+
+    /**
+     * Aldeão que vira zumbi guarda o pet na Pokébola (fica no zumbi); curado, o aldeão solta o pet na hora.
+     * Nossos dados vão junto para a entidade nova.
+     */
+    @SubscribeEvent
+    public static void onConversion(LivingConversionEvent.Post event) {
+        if (!(event.getEntity().level() instanceof ServerLevel)) return;
+        if (event.getEntity() instanceof Villager villager) {
+            PokemonEntity pet = companionOf(villager);
+            if (pet != null) storePet(villager, pet);
+        }
+        CompoundTag from = event.getEntity().getPersistentData();
+        CompoundTag to = event.getOutcome().getPersistentData();
+        for (String key : from.getAllKeys()) {
+            if (key.startsWith(CobblemonEcosystems.MOD_ID + ":")) to.put(key, from.get(key).copy());
+        }
+        if (event.getOutcome() instanceof Villager cured && to.contains(STORED_PET_KEY)) toRelease.add(cured);
+    }
+
+    /** O aldeão para, olha para o Pokémon e faz carinho: corações sobem do Pokémon. */
+    private static void maybePet(ServerLevel level, Villager villager, PokemonEntity pokemon) {
+        if (villager.isSleeping() || villager.isTrading() || pokemon.distanceTo(villager) > 5
+                || level.random.nextFloat() >= PET_CHANCE) return;
+        villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(pokemon, true));
+        pokemon.getLookControl().setLookAt(villager);
+        level.sendParticles(ParticleTypes.HEART, pokemon.getX(), pokemon.getY() + pokemon.getBbHeight() + 0.3, pokemon.getZ(),
+                3, 0.3, 0.2, 0.3, 0);
+        level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.5f, 1.1f);
+    }
+
     private static void adopt(Villager villager, ServerLevel level) {
-        String species = chooseSpecies(villager, level.random);
+        RandomSource random = level.random;
+        Personality personality = personalityOf(villager, random);
+        String species = chooseSpecies(villager, random);
         PokemonEntity pokemon = PokemonProperties.Companion
-                .parse(species + " level=" + (5 + level.random.nextInt(11)) + " uncatchable")
+                .parse(species + " level=" + personality.rollLevel(random) + " uncatchable")
                 .createEntity(level);
         pokemon.moveTo(villager.getX(), villager.getY(), villager.getZ(), villager.getYRot(), 0f);
         pokemon.getPersistentData().putUUID(VILLAGER_KEY, villager.getUUID());
@@ -157,8 +315,94 @@ public class VillagerCompanions {
         if (!level.addFreshEntity(pokemon)) return;
 
         villager.getPersistentData().putUUID(COMPANION_KEY, pokemon.getUUID());
+        villager.getPersistentData().putLong(PET_SEEN_KEY, level.getDayTime());
+        rollTeam(villager, personality, species, random);
         companions.add(pokemon);
+        owners.add(villager);
         if (HEAD_RIDERS.contains(species)) pokemon.startRiding(villager, true);
+    }
+
+    /** A personalidade do aldeão; sorteada pela profissão na primeira vez (inclusive para pets de versões antigas). */
+    static Personality personalityOf(Villager villager, RandomSource random) {
+        CompoundTag data = villager.getPersistentData();
+        if (data.contains(PERSONALITY_KEY)) {
+            try {
+                return Personality.valueOf(data.getString(PERSONALITY_KEY));
+            } catch (IllegalArgumentException ignored) {
+                // valor inválido: sorteia de novo
+            }
+        }
+        Personality personality = Personality.PEACEFUL;
+        if (!villager.isBaby()) {
+            int[] weights = personalityWeights(villager.getVillagerData().getProfession());
+            int roll = random.nextInt(weights[0] + weights[1] + weights[2] + weights[3]);
+            for (Personality p : Personality.values()) {
+                roll -= weights[p.ordinal()];
+                if (roll < 0) {
+                    personality = p;
+                    break;
+                }
+            }
+        }
+        data.putString(PERSONALITY_KEY, personality.name());
+        return personality;
+    }
+
+    /** O resto do time (fica na Pokébola, só aparece na batalha), salvo como propriedades do Cobblemon. */
+    static void rollTeam(Villager villager, Personality personality, String shownSpecies, RandomSource random) {
+        List<String> pool = new ArrayList<>(BY_PROFESSION.getOrDefault(villager.getVillagerData().getProfession(), GENERIC));
+        pool.addAll(GENERIC);
+        if (pool.size() > 1) pool.remove(shownSpecies);
+        ListTag team = new ListTag();
+        for (int i = 0; i < personality.extraPokemon; i++) {
+            team.add(StringTag.valueOf(pick(pool, random) + " level=" + personality.rollLevel(random)));
+        }
+        villager.getPersistentData().put(TEAM_KEY, team);
+    }
+
+    static List<String> teamOf(Villager villager) {
+        List<String> team = new ArrayList<>();
+        for (Tag entry : villager.getPersistentData().getList(TEAM_KEY, Tag.TAG_STRING)) team.add(entry.getAsString());
+        return team;
+    }
+
+    /** O Pokémon que segue o aldeão, se estiver carregado no mundo. */
+    static PokemonEntity companionOf(Villager villager) {
+        if (!villager.getPersistentData().hasUUID(COMPANION_KEY)) return null;
+        Entity entity = ((ServerLevel) villager.level()).getEntity(villager.getPersistentData().getUUID(COMPANION_KEY));
+        return entity instanceof PokemonEntity pokemon && entity.isAlive() ? pokemon : null;
+    }
+
+    /** Guarda o Pokémon "na Pokébola": a entidade fica salva no aldeão e sai do mundo. */
+    static void storePet(Villager villager, PokemonEntity pokemon) {
+        CompoundTag entityData = new CompoundTag();
+        pokemon.stopRiding();
+        if (!pokemon.save(entityData)) return;
+        villager.getPersistentData().put(STORED_PET_KEY, entityData);
+        companions.remove(pokemon);
+        pokemon.discard();
+    }
+
+    /** Solta o Pokémon guardado ao lado do aldeão (ou na cabeça, se for pequeno). */
+    static void releasePet(Villager villager) {
+        CompoundTag data = villager.getPersistentData();
+        if (!data.contains(STORED_PET_KEY)) return;
+        ServerLevel level = (ServerLevel) villager.level();
+        CompoundTag entityData = data.getCompound(STORED_PET_KEY);
+        data.remove(STORED_PET_KEY);
+        data.putLong(PET_SEEN_KEY, level.getDayTime());
+        EntityType.create(entityData, level).ifPresent(entity -> {
+            entity.moveTo(villager.getX(), villager.getY(), villager.getZ(), villager.getYRot(), 0f);
+            entity.getPersistentData().putUUID(VILLAGER_KEY, villager.getUUID());
+            data.putUUID(COMPANION_KEY, entity.getUUID());
+            if (entity instanceof PokemonEntity healed) {
+                healed.getPokemon().heal();
+                healed.setHealth(healed.getMaxHealth());
+            }
+            if (!level.addFreshEntity(entity) || !(entity instanceof PokemonEntity pokemon)) return;
+            level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 0.6f, 1.4f);
+            if (HEAD_RIDERS.contains(PokemonAi.species(pokemon))) pokemon.startRiding(villager, true);
+        });
     }
 
     private static String chooseSpecies(Villager villager, RandomSource random) {

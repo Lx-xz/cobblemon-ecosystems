@@ -7,5 +7,16 @@
   "cobblemon_ecosystems.trader.no_pokemon": "Estou sem Pokémon para batalhar agora.",
   "cobblemon_ecosystems.trader.party_fainted": "Seus Pokémon estão cansados demais para batalhar.",
   "cobblemon_ecosystems.trader.not_your_prize": "Esse Mudbray é o prêmio de outra pessoa!",
-  "cobblemon_ecosystems.trader.wants_to_battle": "O Mercador Ambulante quer batalhar com você!"
+  "cobblemon_ecosystems.trader.wants_to_battle": "O Mercador Ambulante quer batalhar com você!",
+  "cobblemon_ecosystems.villager.challenge_villager": "Esse Pokémon é de um aldeão. Desafie o aldeão!",
+  "cobblemon_ecosystems.villager.challenge_friendly": "Uma batalha amistosa? Claro, vamos nos divertir!",
+  "cobblemon_ecosystems.villager.challenge_competitive": "Vamos ver do que você é capaz!",
+  "cobblemon_ecosystems.villager.challenge_challenger": "Finalmente um oponente à altura! Não vou pegar leve.",
+  "cobblemon_ecosystems.villager.refuse_peaceful": "Meu Pokémon não gosta de brigar.",
+  "cobblemon_ecosystems.villager.refuse_baby": "Eu sou pequeno demais para batalhar!",
+  "cobblemon_ecosystems.villager.tired": "Meu Pokémon precisa descansar. Volte mais tarde.",
+  "cobblemon_ecosystems.villager.party_fainted": "Seus Pokémon estão cansados demais para batalhar.",
+  "cobblemon_ecosystems.villager.win_discount": "Você venceu! Para você, minhas trocas ficam mais baratas.",
+  "cobblemon_ecosystems.villager.win_emeralds": "Você venceu! Tome, umas esmeraldas para você.",
+  "cobblemon_ecosystems.villager.lose": "Rá! Mais sorte da próxima vez."
 }

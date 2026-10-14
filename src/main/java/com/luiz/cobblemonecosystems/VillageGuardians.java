@@ -19,31 +19,41 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * Golett e Golurk no lugar dos golens de ferro: nascem com a vila e quando os aldeões chamam um golem.
+ *
+ * Para testar: /summon iron_golem ~ ~ ~ {NeoForgeData:{"cobblemon_ecosystems:guardian_replace":"STRUCTURE","cobblemon_ecosystems:guardian_species":"golurk"}}
  * Atacam mobs hostis (menos creepers, como o golem de ferro), não se afastam muito de casa e têm o ícone
  * da vila no nome.
  */
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class VillageGuardians {
     private static final float GOLURK_CHANCE = 0.4f;
-    /** Os aldeões chamam golem com frequência; acima disso por perto, o chamado é ignorado. */
-    private static final int MAX_NEARBY_GUARDIANS = 2;
+    /** Os aldeões chamam golem com frequência. Limite por vila: 1 guardião a cada 5 aldeões, entre 2 e 4. */
+    private static final int VILLAGERS_PER_GUARDIAN = 5;
+    private static final int MIN_GUARDIANS = 2, MAX_GUARDIANS = 4;
+    /** Parte do dano de monstros que os guardiões recebem (o golem de ferro tem 100 de vida; Pokémon têm menos). */
+    private static final float MONSTER_DAMAGE_TAKEN = 0.4f;
     private static final double NEARBY_RADIUS = 32;
     private static final double HOME_RADIUS = 24;
     private static final double ENEMY_RANGE = 16;
 
     private static final String REPLACE_KEY = CobblemonEcosystems.MOD_ID + ":guardian_replace";
     private static final String HOME_KEY = CobblemonEcosystems.MOD_ID + ":guardian_home";
+    /** No golem marcado (por comando): força a espécie, "golett" ou "golurk". */
+    private static final String SPECIES_KEY = CobblemonEcosystems.MOD_ID + ":guardian_species";
 
-    private record Pending(ServerLevel level, Vec3 pos, float yaw, boolean summoned) {}
+    private record Pending(ServerLevel level, Vec3 pos, float yaw, boolean summoned, String species) {}
     private static final List<Pending> pending = new ArrayList<>();
     private static final Set<PokemonEntity> guardians = new HashSet<>();
     private static int tick;
@@ -51,7 +61,7 @@ public class VillageGuardians {
     /** Marca o golem de ferro na hora em que a vila o cria ou um aldeão o chama. */
     @SubscribeEvent
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
-        if (event.getEntity().getType() != EntityType.IRON_GOLEM) return;
+        if (!Config.VILLAGE_GUARDIANS.get() || event.getEntity().getType() != EntityType.IRON_GOLEM) return;
         MobSpawnType reason = event.getSpawnType();
         if (reason == MobSpawnType.STRUCTURE || reason == MobSpawnType.MOB_SUMMONED) {
             event.getEntity().getPersistentData().putString(REPLACE_KEY, reason.name());
@@ -59,10 +69,15 @@ public class VillageGuardians {
     }
 
     /** Chamado por CobblemonEcosystems quando o golem bloqueado estava marcado. */
+    static boolean isMarked(Entity entity) {
+        return entity.getPersistentData().contains(REPLACE_KEY);
+    }
+
     static void replaceIfMarked(Entity golem, ServerLevel level) {
         String reason = golem.getPersistentData().getString(REPLACE_KEY);
         if (reason.isEmpty()) return;
-        pending.add(new Pending(level, golem.position(), golem.getYRot(), reason.equals(MobSpawnType.MOB_SUMMONED.name())));
+        pending.add(new Pending(level, golem.position(), golem.getYRot(), reason.equals(MobSpawnType.MOB_SUMMONED.name()),
+                golem.getPersistentData().getString(SPECIES_KEY)));
     }
 
     @SubscribeEvent
@@ -71,6 +86,15 @@ public class VillageGuardians {
                 && pokemon.getPersistentData().contains(HOME_KEY)) {
             PokemonAi.markAsVillagePokemon(pokemon); // também corrige nomes antigos
             guardians.add(pokemon);
+        }
+    }
+
+    /** Guardiões aguentam mais os monstros, como o golem de ferro aguenta. */
+    @SubscribeEvent
+    public static void onIncomingDamage(LivingIncomingDamageEvent event) {
+        if (event.getEntity() instanceof PokemonEntity pokemon && pokemon.getPersistentData().contains(HOME_KEY)
+                && event.getSource().getEntity() instanceof Enemy) {
+            event.setAmount(event.getAmount() * MONSTER_DAMAGE_TAKEN);
         }
     }
 
@@ -85,9 +109,12 @@ public class VillageGuardians {
             if (guardian.isBusy() || Hunts.isHunting(guardian)) continue;
             LivingEntity enemy = nearestEnemy(guardian);
             if (enemy != null) {
-                Hunts.start(guardian, enemy, damage(guardian), 0.4, 20);
+                boolean golurk = PokemonAi.species(guardian).equals("golurk");
+                Hunts.start(guardian, enemy, damage(guardian), golurk ? 0.5 : 0.4, golurk ? 25 : 20);
                 continue;
             }
+            // Fora da luta, se recupera aos poucos.
+            if (guardian.getHealth() < guardian.getMaxHealth()) guardian.heal(1f);
             BlockPos home = BlockPos.of(guardian.getPersistentData().getLong(HOME_KEY));
             if (!guardian.blockPosition().closerThan(home, HOME_RADIUS)) PokemonAi.walkTo(guardian, home, 0.6f, 4);
         }
@@ -100,17 +127,17 @@ public class VillageGuardians {
                 .stream().min(Comparator.comparingDouble(guardian::distanceToSqr)).orElse(null);
     }
 
-    /** O golem de ferro dá de 7 a 21; Golett bate menos, Golurk chega perto do golem. */
+    /** Dano mínimo de cada golpe (o golpe do moveset pode dar mais). O golem de ferro dá de 7 a 21. */
     private static float damage(PokemonEntity guardian) {
         int level = guardian.getPokemon().getLevel();
-        return PokemonAi.species(guardian).equals("golurk") ? 8f + level / 6f : 4f + level / 8f;
+        return PokemonAi.species(guardian).equals("golurk") ? 12f + level / 4f : 7f + level / 4f;
     }
 
     private static void spawn(Pending p) {
-        if (p.summoned() && countNear(p.level(), p.pos()) >= MAX_NEARBY_GUARDIANS) return;
+        if (p.summoned() && countNear(p.level(), p.pos()) >= maxGuardians(p.level(), p.pos())) return;
 
         RandomSource random = p.level().random;
-        boolean golurk = random.nextFloat() < GOLURK_CHANCE;
+        boolean golurk = p.species().isEmpty() ? random.nextFloat() < GOLURK_CHANCE : p.species().equals("golurk");
         int level = golurk ? 43 + random.nextInt(8) : 20 + random.nextInt(11);
         PokemonEntity pokemon = PokemonProperties.Companion
                 .parse((golurk ? "golurk" : "golett") + " level=" + level + " uncatchable")
@@ -120,6 +147,12 @@ public class VillageGuardians {
         KeptPokemon.keep(pokemon);
         PokemonAi.markAsVillagePokemon(pokemon);
         p.level().addFreshEntity(pokemon);
+    }
+
+    /** 1 guardião a cada 5 aldeões por perto, entre 2 e 4. */
+    private static int maxGuardians(ServerLevel level, Vec3 pos) {
+        int villagers = level.getEntitiesOfClass(Villager.class, new AABB(pos, pos).inflate(NEARBY_RADIUS)).size();
+        return Math.max(MIN_GUARDIANS, Math.min(MAX_GUARDIANS, villagers / VILLAGERS_PER_GUARDIAN));
     }
 
     private static int countNear(ServerLevel level, Vec3 pos) {

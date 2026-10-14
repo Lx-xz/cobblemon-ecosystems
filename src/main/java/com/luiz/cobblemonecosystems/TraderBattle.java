@@ -63,8 +63,8 @@ public class TraderBattle {
 
     @SubscribeEvent
     public static void onInteract(PlayerInteractEvent.EntityInteract event) {
-        if (!(event.getTarget() instanceof WanderingTrader trader) || !(event.getEntity() instanceof ServerPlayer player)
-                || !player.isShiftKeyDown()) return;
+        if (!Config.TRADER_BATTLE.get() || !(event.getTarget() instanceof WanderingTrader trader)
+                || !(event.getEntity() instanceof ServerPlayer player) || !player.isShiftKeyDown()) return;
         // Agachado não abre a tela de trocas; o clique vira o desafio.
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
@@ -124,7 +124,7 @@ public class TraderBattle {
         BattleRegistry.startBattle(
                 BattleFormat.Companion.getGEN_9_SINGLES(),
                 new BattleSide(new PlayerBattleActor(player.getUUID(), playerTeam)),
-                new BattleSide(new TraderBattleActor(TRADER_NAME, trader, traderTeam, AI_SKILL)),
+                new BattleSide(new MobTrainerActor(TRADER_NAME, trader, traderTeam, AI_SKILL)),
                 false);
 
         // Mercador parado olhando para o jogador; os Mudbray de verdade somem enquanto as cópias batalham.
@@ -143,6 +143,7 @@ public class TraderBattle {
     static void registerCobblemonEvents() {
         // R mirando num Mudbray do mercador abriria batalha selvagem com ele: vira desafio ao mercador.
         CobblemonEvents.BATTLE_STARTED_PRE.subscribe(Priority.NORMAL, event -> {
+            if (!Config.TRADER_BATTLE.get()) return;
             WanderingTrader trader = null;
             ServerPlayer player = null;
             UUID leading = null;
@@ -167,6 +168,7 @@ public class TraderBattle {
 
         // R mirando no mercador só solta o Pokémon perto dele: se cair perto, vira desafio.
         CobblemonEvents.POKEMON_SENT_POST.subscribe(Priority.NORMAL, event -> {
+            if (!Config.TRADER_BATTLE.get()) return;
             Pokemon pokemon = event.getPokemon();
             ServerPlayer player = pokemon.getOwnerPlayer();
             if (player == null || PlayerExtensionsKt.isInBattle(player)) return;

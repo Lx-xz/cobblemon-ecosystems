@@ -1,0 +1,14 @@
+{
+  "species": "cobblemon:purrloin",
+  "order": 1,
+  "variations": [
+    {
+      "aspects": ["ecosystems_witch"],
+      "texture": "cobblemon_ecosystems:textures/pokemon/purrloin_witch.png"
+    },
+    {
+      "aspects": ["ecosystems_witch", "shiny"],
+      "texture": "cobblemon_ecosystems:textures/pokemon/purrloin_witch_shiny.png"
+    }
+  ]
+}

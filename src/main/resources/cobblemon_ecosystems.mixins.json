@@ -4,6 +4,6 @@
   "package": "com.luiz.cobblemonecosystems.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": ["CarvedPumpkinBlockMixin"],
-  "client": ["client.PokemonRendererMixin"],
+  "client": ["client.PokemonRendererMixin", "client.WanderingTraderRendererMixin"],
   "injectors": { "defaultRequire": 1 }
 }

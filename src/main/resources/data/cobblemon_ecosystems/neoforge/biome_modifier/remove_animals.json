@@ -1,5 +1,3 @@
 {
-  "type": "neoforge:remove_spawns",
-  "biomes": { "type": "neoforge:any" },
-  "entity_types": "#cobblemon_ecosystems:removed_animals"
+  "type": "cobblemon_ecosystems:remove_configured_spawns"
 }
