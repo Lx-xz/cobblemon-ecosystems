@@ -52,8 +52,10 @@ public class VillageGuardians {
     private static final String HOME_KEY = CobblemonEcosystems.MOD_ID + ":guardian_home";
     /** No golem marcado (por comando): força a espécie, "golett" ou "golurk". */
     private static final String SPECIES_KEY = CobblemonEcosystems.MOD_ID + ":guardian_species";
+    /** Valor de REPLACE_KEY do golem da jaula dos postos de saqueadores ({@link OutpostCaptives}). */
+    private static final String CAGED = "CAGED";
 
-    private record Pending(ServerLevel level, Vec3 pos, float yaw, boolean summoned, String species) {}
+    private record Pending(ServerLevel level, Vec3 pos, float yaw, boolean summoned, boolean caged, String species) {}
     private static final List<Pending> pending = new ArrayList<>();
     private static final Set<PokemonEntity> guardians = new HashSet<>();
     private static int tick;
@@ -63,7 +65,11 @@ public class VillageGuardians {
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
         if (!Config.VILLAGE_GUARDIANS.get() || event.getEntity().getType() != EntityType.IRON_GOLEM) return;
         MobSpawnType reason = event.getSpawnType();
-        if (reason == MobSpawnType.STRUCTURE || reason == MobSpawnType.MOB_SUMMONED) {
+        if (reason == MobSpawnType.STRUCTURE && Config.OUTPOST_CAPTIVES.get()
+                && OutpostCaptives.isInOutpost(event.getLevel(), event.getEntity().blockPosition())) {
+            // O golem preso na jaula do posto de saqueadores: vira um Pokémon preso, não um guardião.
+            event.getEntity().getPersistentData().putString(REPLACE_KEY, CAGED);
+        } else if (reason == MobSpawnType.STRUCTURE || reason == MobSpawnType.MOB_SUMMONED) {
             event.getEntity().getPersistentData().putString(REPLACE_KEY, reason.name());
         }
     }
@@ -77,7 +83,7 @@ public class VillageGuardians {
         String reason = golem.getPersistentData().getString(REPLACE_KEY);
         if (reason.isEmpty()) return;
         pending.add(new Pending(level, golem.position(), golem.getYRot(), reason.equals(MobSpawnType.MOB_SUMMONED.name()),
-                golem.getPersistentData().getString(SPECIES_KEY)));
+                reason.equals(CAGED), golem.getPersistentData().getString(SPECIES_KEY)));
     }
 
     @SubscribeEvent
@@ -134,6 +140,10 @@ public class VillageGuardians {
     }
 
     private static void spawn(Pending p) {
+        if (p.caged()) {
+            OutpostCaptives.spawn(p.level(), p.pos(), p.yaw());
+            return;
+        }
         if (p.summoned() && countNear(p.level(), p.pos()) >= maxGuardians(p.level(), p.pos())) return;
 
         RandomSource random = p.level().random;

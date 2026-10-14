@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import com.cobblemon.mod.common.pokemon.Gender;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -130,7 +131,7 @@ public class StructurePokemon {
     private static final String REPLACE_KEY = CobblemonEcosystems.MOD_ID + ":replace";
     private static final String WITCH_KEY = CobblemonEcosystems.MOD_ID + ":witch_cat";
     /** Aspect do gato da bruxa: pelo preto e olhos laranja (no shiny, branco de olhos roxos). Passa para a evolução. */
-    private static final String WITCH_ASPECT = "ecosystems_witch";
+    static final String WITCH_ASPECT = "ecosystems_witch";
     /** No animal marcado: o tipo de vila e qual vila (para todos da mesma vila sortearem igual). */
     private static final String VILLAGE_TYPE_KEY = CobblemonEcosystems.MOD_ID + ":replace_village";
     private static final String VILLAGE_ID_KEY = CobblemonEcosystems.MOD_ID + ":replace_village_id";
@@ -208,9 +209,24 @@ public class StructurePokemon {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         if (event.getLevel() instanceof ServerLevel && event.getEntity() instanceof PokemonEntity pokemon
-                && "minecraft:chicken".equals(pokemon.getPersistentData().getString(SOURCE_KEY))) {
+                && ("minecraft:chicken".equals(pokemon.getPersistentData().getString(SOURCE_KEY))
+                    || EGG_LAYERS.contains(PokemonAi.species(pokemon)))) {
             egglayers.add(pokemon);
         }
+    }
+
+    /** As espécies que substituem as galinhas (e as evoluções): as fêmeas delas botam ovos no pasto também. */
+    private static final Set<String> EGG_LAYERS = eggLayers();
+
+    private static Set<String> eggLayers() {
+        Set<String> species = new HashSet<>();
+        for (List<Family> families : REPLACEMENTS.get(EntityType.CHICKEN).values()) {
+            for (Family family : families) {
+                species.add(family.base());
+                if (family.evolved() != null) species.add(family.evolved());
+            }
+        }
+        return species;
     }
 
     @SubscribeEvent
@@ -230,7 +246,10 @@ public class StructurePokemon {
                 ? EVOLVED_MIN_LEVEL + random.nextInt(EVOLVED_MAX_LEVEL - EVOLVED_MIN_LEVEL + 1)
                 : BASE_MIN_LEVEL + random.nextInt(BASE_MAX_LEVEL - BASE_MIN_LEVEL + 1);
 
-        PokemonEntity pokemon = PokemonProperties.Companion.parse(species + " level=" + level + (p.forceShiny() ? " shiny=true" : "")).createEntity(p.level());
+        // O gato da bruxa é dela ({@link HutWitch}): só dá para ganhar vencendo a bruxa.
+        boolean witchPet = p.witchCat() && Config.WITCH_PET.get();
+        PokemonEntity pokemon = PokemonProperties.Companion.parse(species + " level=" + level + (p.forceShiny() ? " shiny=true" : "")
+                + (witchPet ? " uncatchable" : "")).createEntity(p.level());
         if (p.witchCat()) {
             pokemon.getPokemon().setForcedAspects(new HashSet<>(Set.of(WITCH_ASPECT)));
             pokemon.getPokemon().updateAspects();
@@ -258,11 +277,18 @@ public class StructurePokemon {
         return options.get(0);
     }
 
-    /** As aves que vieram das galinhas botam ovos de vez em quando. */
+    /**
+     * As fêmeas das aves que vieram das galinhas (selvagens, nos currais) e as fêmeas dessas espécies num pasto
+     * botam ovos de vez em quando. Machos e Pokémon seguindo o jogador não botam.
+     */
     private static void layEggs() {
         egglayers.removeIf(Entity::isRemoved);
+        if (!Config.EGG_LAYERS.get()) return;
         for (PokemonEntity pokemon : egglayers) {
-            if (pokemon.isBusy() || !PokemonAi.isWild(pokemon)) continue;
+            boolean fromChicken = "minecraft:chicken".equals(pokemon.getPersistentData().getString(SOURCE_KEY));
+            boolean inPen = fromChicken && PokemonAi.isWild(pokemon);
+            boolean inPasture = pokemon.getTethering() != null && EGG_LAYERS.contains(PokemonAi.species(pokemon));
+            if (pokemon.isBusy() || (!inPen && !inPasture) || pokemon.getPokemon().getGender() != Gender.FEMALE) continue;
             var data = pokemon.getPersistentData();
             long now = pokemon.level().getGameTime();
             if (!data.contains(NEXT_EGG_KEY)) data.putLong(NEXT_EGG_KEY, now + nextEggDelay(pokemon.getRandom()));

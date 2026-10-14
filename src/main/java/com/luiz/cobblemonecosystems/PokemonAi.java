@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Atalhos para os Pokémon do Cobblemon. Eles não usam os "goals" antigos do Minecraft: andam lendo a
@@ -42,6 +43,16 @@ public final class PokemonAi {
 
     public static void walkTo(PokemonEntity pokemon, Entity target, float speed, int closeEnough) {
         pokemon.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(target, speed, closeEnough));
+    }
+
+    public static void walkTo(PokemonEntity pokemon, Vec3 pos, float speed, int closeEnough) {
+        pokemon.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, speed, closeEnough));
+    }
+
+    /** Para de andar: apaga o destino e para a navegação. */
+    public static void stop(PokemonEntity pokemon) {
+        pokemon.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+        pokemon.getNavigation().stop();
     }
 
     /**

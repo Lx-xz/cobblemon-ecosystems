@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "com.luiz.cobblemonecosystems.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["CarvedPumpkinBlockMixin"],
+  "mixins": ["CarvedPumpkinBlockMixin", "PokemonEntityMixin"],
   "client": ["client.PokemonRendererMixin", "client.WanderingTraderRendererMixin"],
   "injectors": { "defaultRequire": 1 }
 }

@@ -11,6 +11,8 @@ Legenda: `[x]` feito · `[ ]` a fazer · **(decidir)** precisa de decisão antes
 
 - [x] Remover animais vanilla do spawn natural de todos os biomas (biome modifier + tag editável)
 - [x] Bloquear animais de outras fontes (ovos, reprodução, gatos de vila, mundos antigos, `/summon`)
+- [x] Baldes de peixe, girino e axolote desativados: o mercador ambulante não vende balde de bicho removido (sem
+      aquário no jogo, não vale um "balde com Pokémon") — *a testar no jogo*
 - [x] Hoglin removido (javali)
 - [x] Aranhas e aranhas de caverna removidas (olho de aranha e linha continuam vindo de Spinarak, Ariados, Joltik, Galvantula, Tarountula, Spidops)
 - [x] Mercador ambulante chega com 2 Mudbray na guia, no lugar das lhamas
@@ -80,6 +82,8 @@ chance_evoluido = 0.2
 - [x] Recarregar sem reiniciar: vale na hora, menos os spawns naturais nos biomas (ao reabrir o mundo)
 - [x] Explicar cada opção em comentários no próprio arquivo (inglês e português)
 - [x] Traduções (pt_br e en_us) em vez de textos fixos no código (falas e nomes do mercador)
+- [x] Tela de configuração dentro do jogo (Mods → Cobblemon Ecosystems → Config), com nomes traduzidos
+- [x] Testado no jogo: tirar os slimes pela configuração funciona
 - [ ] Testar em servidor dedicado (não só no singleplayer)
 - [x] Página do mod no Modrinth (descrição, changelog, imagens, dependências) — versão 1.0.0
 
@@ -98,14 +102,16 @@ mecânica sem substituto, ficam.
 | Phantom | **Fica** | Morto-vivo fantasioso |
 | Cavalo esqueleto / zumbi, Zoglin | **Ficam** | Mortos-vivos |
 | Slime / Magma Cube | **Opção na configuração** (`slimes`, desligada por padrão) | Monstros; Grimer, Goomy e Solosis dão slimeball; Slugma, Magcargo, Numel, Camerupt e Heatran dão creme de magma |
-| Traça (silverfish) | **(decidir)** | Tem contraparte: Pokémon inseto que vivem na pedra (ver abaixo) |
+| Traça (silverfish) | **Vira Dwebble** (opção `silverfish_dwebble`) | Inseto que mora dentro de uma pedra, combina com bloco infestado |
 
 - [x] Opção `remove_slimes` na configuração (slime e magma cube juntos, desligada por padrão)
-- [ ] Traça → **Dwebble** nos blocos infestados (decidido: Nincada é raro demais para a quantidade de traças)
-  - Dwebble é um inseto que mora dentro de uma pedra, combina com "bloco infestado"
-  - Funcionaria assim: quebrar um bloco infestado faz sair um Nincada selvagem e bravo, e os outros
-    escondidos nos blocos por perto também saem (como as traças chamam as outras)
-- [ ] Spawners de aranha das minas abandonadas: trocar por spawn de Spinarak e Joltik (hoje ficam vazios)
+- [x] Traça → **Dwebble** nos blocos infestados (Nincada é raro demais para a quantidade de traças) — *a testar no jogo*
+  - Quebrar um bloco infestado faz sair um Dwebble selvagem e bravo, que ataca o jogador mais perto por 30 s
+  - Machucado por um jogador, chama os outros: blocos infestados por perto se abrem e soltam mais Dwebble
+    (com `mobGriefing` desligado, o bloco fica inteiro e o Dwebble aparece ao lado)
+- [x] **Spawners viram ninhos** (opção `spider_spawner_nests`) — *a testar no jogo*: quando o chunk carrega, o spawner de
+      aranha (minas, masmorras) some e deixa 3 a 5 Pokémon aranha de uma espécie (Spinarak, Joltik ou Tarountula, às
+      vezes evoluídos), que ficam por perto e não somem. Sem farm infinita. O spawner de traça da fortaleza vira ninho de Dwebble
 - [ ] Jóquei de aranha: o esqueleto deveria montar num Ariados?
 
 ---
@@ -123,7 +129,10 @@ mecânica sem substituto, ficam.
       (até 16 blocos); perdem a casa se ela for quebrada; morador sumido (capturado, derrotado) libera a vaga
 - [ ] Bug corrigido a testar: abelhas do vanilla tentando sair sem parar (som infinito)
 - [ ] Mexer na colmeia sem fogueira embaixo deixa os moradores bravos (com o revide da seção 6)
-- [ ] **No pasto**: Pokémon abelha do jogador usam colmeias craftadas perto do pasto
+- [x] **No pasto**: Pokémon abelha do jogador adotam uma colmeia craftada na área do pasto, visitam as flores de lá, fazem
+      mel e entram nela à noite, na chuva e depois de levar mel. Ficam escondidos dentro da colmeia (invisíveis e parados)
+      em vez de sair do mundo, porque o Cobblemon tiraria o Pokémon do pasto — *a testar no jogo*
+  - [x] Textura de pólen (a do Cobblemon) depois de visitar uma flor
 - [ ] Toque Suave: levar a colmeia com os Pokémon dentro (hoje quebrar sempre solta todos)
 - [ ] **(decidir)** Beedrill fora das colmeias (minha sugestão): é vespa, não faz mel
   - Kakuna penduradas nas árvores de florestas, e Beedrill defendendo a área (seção 6, território)
@@ -137,9 +146,12 @@ mecânica sem substituto, ficam.
 ### Cães e lobos
 - [x] Esqueletos fogem de 27 Pokémon cachorro — **já existe no Cobblemon**
 - [x] Pokémon cachorro (do jogador e selvagens) caçam esqueletos
-- [x] Cachorros selvagens às vezes caçam Pokémon ovelha selvagens (nunca os de jogador, vila ou colmeia)
+- [x] Lobos selvagens (Poochyena, Mightyena, Lycanroc) às vezes caçam Pokémon ovelha selvagens (nunca os de jogador,
+      vila ou colmeia); os outros cachorros não
 
 ### Galinhas
+- [x] **Só as fêmeas** botam ovos (as aves dos currais e as mesmas espécies no pasto) — *a testar no jogo*
+- [x] **No pasto**: fêmeas de Doduo, Psyduck, Torchic, Delibird, Piplup e evoluções botam ovos, como nos currais
 - [ ] **Combusken** bota ovos de tempos em tempos (pasto e currais de vila)
   - Torchic não: é um pintinho
   - Chansey não: o ovo dela não é de galinha
@@ -161,6 +173,7 @@ Sapos: linha do Froakie, Poliwag (o girino!), Politoed, Croagunk, Toxicroak, lin
 
 ### Cabras
 - [ ] Skiddo e Gogoat dão chifre de cabra ao dar cabeçada em pedra ou madeira
+  - Tentado e tirado por enquanto: no teste não se viu nenhum dando cabeçada nem soltando chifre
 
 ### Golfinhos
 - [ ] Lapras, Wailmer, Dewgong e Primarina dão "graça do golfinho" a quem nada perto
@@ -188,11 +201,15 @@ Sapos: linha do Froakie, Poliwag (o girino!), Politoed, Croagunk, Toxicroak, lin
 
 Regra geral: produção lenta, com tempo de espera. Talvez exija o Pokémon feliz ou alimentado, para não ficar forte demais.
 
+- [x] **Voltar para o pasto** (opção `pasture_return`): Pokémon que saem da área voltam andando. O Cobblemon teleportava
+      e, se não conseguisse, mandava para o PC (por isso era preciso cercar). Agora só teleporta se não conseguir voltar
+      em 30 s ou estiver a mais de 48 blocos, e nunca manda para o PC enquanto o bloco do pasto existir — *a testar no jogo*
+
 - [ ] **Aranhas** (Spinarak, Ariados, Joltik, Galvantula): tecem teias (cobweb) nos cantos e soltam linha
 - [ ] **Tipo Fogo** (linha do Charmander, Fennekin, Houndour): soltam pó de blaze
 - [ ] **Gelatinosos** (Solosis, Grimer, Goomy): soltam slimeball
-- [ ] **Abelhas**: Pokémon abelha do jogador no pasto usam colmeias craftadas perto dele (mel e favo)
-- [ ] **Combusken**: ovos
+- [x] **Abelhas**: Pokémon abelha do jogador no pasto usam colmeias craftadas na área dele (mel e favo)
+- [x] **Aves das galinhas** (só fêmeas): ovos
 - [ ] **Magcargo e Slugma**: transformam pedra em volta em bloco de magma
 - [ ] **Snorunt e Vanillite**: neve e gelo em volta
 - [ ] **Shuckle**: fermenta frutas guardadas e faz Suco de Fruta (como no jogo original)
@@ -213,6 +230,7 @@ Regra geral: produção lenta, com tempo de espera. Talvez exija o Pokémon feli
 - [ ] Bellossom dança quando faz sol
 - [ ] Cherrim muda de forma com o tempo (sol ou nublado)
 - [ ] Sudowoodo finge ser árvore: congela quando o jogador olha e foge da água
+  - Tentado e tirado por enquanto: ele parava de andar, mas não ficava parado na pose característica
 - [ ] Shroomish, Breloom, Paras e Parasect espalham cogumelos e micélio
 - [ ] Foongus e Amoonguss se disfarçam de Pokébola no chão
 - [ ] Lotad cria vitórias-régias na água
@@ -330,13 +348,21 @@ Teste rápido no jogo:
 - [ ] Bruxas com Murkrow, Honchkrow ou Mismagius
 - [x] Gato da cabana da bruxa vira **Purrloin** (ou Liepard)
 - [x] Purrloin/Liepard da bruxa com textura de gato preto e olhos laranja (shiny: branco de olhos roxos)
-- [ ] Purrloin como pet da bruxa
-- [ ] Bruxa da cabana neutra e desafiável: vencer dá o Purrloin dela
+- [x] **Purrloin como pet da bruxa** da cabana (só a que nasce com a cabana; as da farm de bruxa continuam normais) — *a testar no jogo*
+  - Segue a bruxa, não leva dano de jogadores e é incapturável
+  - Se a bruxa morrer, o Purrloin foge e some
+  - Sem gato por perto (mundos antigos), a bruxa conjura um Purrloin preto depois de 1 minuto
+- [x] **Bruxa da cabana neutra**: só ataca quem a atacou, por 2 minutos
+- [x] **Batalha com a bruxa** (agachar + clique direito, ou lançar Pokémon nela ou no gato): o gato e mais um Pokémon
+      sombrio (Murkrow, Misdreavus ou Gastly). Vencer é o único jeito de ganhar o Purrloin (só quem venceu captura); a
+      bruxa fica sem gato e só adota outro 3 dias depois. Brava com o jogador, ela recusa
 - [ ] Ilusionista com Zorua ou Zoroark (Pokémon da ilusão)
 - [ ] Evocador com Shuppet ou Gastly
 - [ ] **(decidir)** Devastador → **Rhyhorn / Rhydon**: rinoceronte de pedra, parecido com o devastador, que
       poderia ser montado pelos saqueadores nas invasões. Se casar bem, aí sim o devastador sai
-- [ ] Postos de saqueadores com Pokémon presos em jaulas (como os golens de ferro e allays presos de hoje)
+- [x] **Postos de saqueadores com Pokémon preso** na jaula do golem de ferro (opção `outpost_captives`): Golett,
+      Growlithe, Ponyta, Mudbray, Riolu, Eevee, Larvitar ou Absol, nível 15–30, selvagem e capturável; não some
+      sozinho. As jaulas de allay continuam — *a testar no jogo*
 
 ---
 

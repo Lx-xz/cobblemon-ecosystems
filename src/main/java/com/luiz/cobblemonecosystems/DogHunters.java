@@ -16,8 +16,8 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
- * Pokémon cachorro fazem o papel dos lobos: caçam esqueletos (do jogador ou selvagens) e, se forem
- * selvagens, de vez em quando caçam Pokémon ovelha selvagens.
+ * Pokémon cachorro fazem o papel dos lobos: caçam esqueletos (do jogador ou selvagens). Só os Pokémon lobo
+ * selvagens, de vez em quando, caçam Pokémon ovelha selvagens.
  * (Esqueletos fugirem deles e gatos espantarem creepers e phantoms o Cobblemon já faz sozinho.)
  */
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
@@ -26,6 +26,8 @@ public class DogHunters {
             "growlithe", "arcanine", "lillipup", "herdier", "stoutland", "rockruff", "lycanroc",
             "poochyena", "mightyena", "houndour", "houndoom", "electrike", "manectric",
             "yamper", "boltund", "maschiff", "mabosstiff", "snubbull", "granbull", "fidough", "dachsbun");
+    /** Os lobos entre os cachorros: só eles caçam ovelhas. */
+    private static final Set<String> WOLVES = Set.of("poochyena", "mightyena", "lycanroc");
     private static final Set<String> SHEEP = Set.of("wooloo", "dubwool", "mareep");
     private static final double SKELETON_RANGE = 12;
     private static final double SHEEP_RANGE = 10;
@@ -50,7 +52,8 @@ public class DogHunters {
         for (PokemonEntity dog : dogs) {
             if (dog.isBusy() || Hunts.isHunting(dog)) continue;
             LivingEntity target = nearestSkeleton(dog);
-            if (target == null && PokemonAi.isWild(dog) && dog.getRandom().nextFloat() < SHEEP_HUNT_CHANCE) {
+            if (target == null && PokemonAi.isWild(dog) && WOLVES.contains(PokemonAi.species(dog))
+                    && dog.getRandom().nextFloat() < SHEEP_HUNT_CHANCE) {
                 target = nearestWildSheep(dog);
             }
             if (target != null) Hunts.start(dog, target, damage(dog), 0.1, 15);

@@ -1,5 +1,55 @@
 # Changelog
 
+## Unreleased
+
+<details>
+<summary><b>🇺🇸 English</b></summary>
+
+### New
+- **In-game config screen**: Mods → Cobblemon Ecosystems → Config, with translated names
+- **Pasture Pokémon walk back** to the pasture when they leave its area, instead of being sent to the PC (no more fences needed)
+- **Pasture bees**: bee Pokémon in a pasture use a crafted beehive in the pasture area, visit the flowers there (getting covered in pollen), make honey and rest inside it at night and in the rain, still in the pasture
+- **Egg-laying birds in a pasture**: female Doduo, Psyduck, Torchic, Delibird, Piplup and their evolutions lay eggs there too
+- **The witch's Purrloin**: the swamp hut witch keeps the black Purrloin as her pet
+  - She is neutral and only attacks who attacked her
+  - The Purrloin follows her and can't be caught or hurt by players; if she dies, it runs away
+  - **Battle the witch** (sneak + right-click, or send out a Pokémon at her or her cat) to win it; she adopts a new one after 3 days
+- **Caged Pokémon in pillager outposts**: the iron golem cage holds a captive Pokémon (Golett, Growlithe, Ponyta, Mudbray, Riolu, Eevee, Larvitar or Absol)
+- **Silverfish become Dwebble**: angry Dwebble come out of infested blocks, attack, and call the others hiding nearby
+- **Spawners become nests**: spider spawners leave a nest of 3 to 5 spider Pokémon of one species (Spinarak, Joltik or Tarountula); the stronghold silverfish spawner leaves Dwebble
+- New config options for each of these
+
+### Changed
+- Only **female** birds lay eggs
+- Only **wolf** Pokémon (Poochyena, Mightyena, Lycanroc) hunt wild sheep Pokémon; other dogs only hunt skeletons
+- The wandering trader no longer sells pufferfish and tropical fish buckets while those fish are removed
+
+</details>
+
+<details>
+<summary><b>🇧🇷 Português</b></summary>
+
+### Novidades
+- **Tela de configuração no jogo**: Mods → Cobblemon Ecosystems → Config, com nomes traduzidos
+- **Pokémon do pasto voltam andando** quando saem da área, em vez de irem para o PC (não precisa mais cercar)
+- **Abelhas no pasto**: Pokémon abelha no pasto usam uma colmeia craftada na área dele, visitam as flores de lá (ficando cobertos de pólen), fazem mel e descansam dentro dela à noite e na chuva, sem sair do pasto
+- **Aves botam ovos no pasto**: fêmeas de Doduo, Psyduck, Torchic, Delibird, Piplup e evoluções botam ovos lá também
+- **O Purrloin da bruxa**: a bruxa da cabana do pântano fica com o Purrloin preto
+  - Ela é neutra e só ataca quem a atacou
+  - O Purrloin segue a bruxa, é incapturável e não leva dano de jogadores; se ela morrer, ele foge
+  - **Batalhe com a bruxa** (agache e clique com o botão direito, ou lance um Pokémon nela ou no gato) para ganhá-lo; ela adota outro depois de 3 dias
+- **Pokémon presos nos postos de saqueadores**: a jaula do golem guarda um Pokémon (Golett, Growlithe, Ponyta, Mudbray, Riolu, Eevee, Larvitar ou Absol)
+- **Traças viram Dwebble**: Dwebble bravos saem dos blocos infestados, atacam e chamam os outros escondidos por perto
+- **Spawners viram ninhos**: spawners de aranha deixam um ninho com 3 a 5 Pokémon aranha de uma espécie (Spinarak, Joltik ou Tarountula); o spawner de traça da fortaleza deixa Dwebble
+- Opções novas na configuração para cada uma dessas
+
+### Mudanças
+- Só as **fêmeas** das aves botam ovos
+- Só os Pokémon **lobo** (Poochyena, Mightyena, Lycanroc) caçam Pokémon ovelha selvagens; os outros cachorros só caçam esqueletos
+- O mercador ambulante não vende mais balde de baiacu nem de peixe tropical enquanto esses peixes estiverem removidos
+
+</details>
+
 ## 1.1.0
 
 <details>

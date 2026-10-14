@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.cobblemon.mod.common.CobblemonMemories;
 import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
+import com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 
 import net.minecraft.core.BlockPos;
@@ -30,11 +32,13 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.level.block.BeehiveBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -87,6 +91,15 @@ public class HivePokemon {
     private static final String COLONY_KEY = CobblemonEcosystems.MOD_ID + ":colony";
     private static final String MEMBERS_KEY = CobblemonEcosystems.MOD_ID + ":members";
     private static final String INSIDE_KEY = CobblemonEcosystems.MOD_ID + ":inside";
+    /** No Pokémon abelha do pasto: a colmeia dele. Na colmeia: é de Pokémon do pasto (selvagens não adotam). */
+    private static final String PASTURE_HIVE_KEY = CobblemonEcosystems.MOD_ID + ":pasture_hive";
+    private static final String PASTURE_OWNED_KEY = CobblemonEcosystems.MOD_ID + ":pasture_owned";
+    /** No Pokémon abelha do pasto: está dentro da colmeia até essa hora (escondido, mas ainda no pasto). */
+    private static final String PASTURE_INSIDE_KEY = CobblemonEcosystems.MOD_ID + ":pasture_inside";
+    /** Procura colmeia para os Pokémon do pasto até essa distância do bloco do pasto (e dentro da área dele). */
+    private static final int PASTURE_HIVE_RADIUS = 24;
+    /** Fora do trabalho, o Pokémon do pasto fica até essa distância da colmeia. */
+    private static final double STAY_NEAR_HIVE = 6;
 
     private record PendingSpawn(ServerLevel level, Vec3 pos, BlockPos hive) {}
     private record PendingRelease(ServerLevel level, BlockPos hive, ListTag inside) {}
@@ -100,8 +113,12 @@ public class HivePokemon {
         long arrivedAt = -1;
         /** Desde quando está tentando voltar para casa (-1 = não está voltando). */
         long returningSince = -1;
+        /** No pasto: quando procurar colmeia de novo. */
+        long nextHiveSearch;
     }
     private static final Map<PokemonEntity, Worker> workers = new HashMap<>();
+    /** Pokémon abelha de jogadores: os que estiverem num pasto trabalham numa colmeia craftada perto dele. */
+    private static final Map<PokemonEntity, Worker> pastureBees = new HashMap<>();
     /** Pokémon abelha selvagens sem colmeia, procurando uma. */
     private static final Set<PokemonEntity> homeless = new HashSet<>();
     /** Colmeias com alguém dentro, para saberem a hora de soltar. */
@@ -120,8 +137,9 @@ public class HivePokemon {
         if (!(event.getLevel() instanceof ServerLevel) || !(event.getEntity() instanceof PokemonEntity pokemon)) return;
         if (pokemon.getPersistentData().contains(HIVE_KEY)) {
             workers.putIfAbsent(pokemon, new Worker());
-        } else if (COLONY_OF.containsKey(PokemonAi.species(pokemon)) && PokemonAi.isWild(pokemon)) {
-            homeless.add(pokemon);
+        } else if (COLONY_OF.containsKey(PokemonAi.species(pokemon))) {
+            if (PokemonAi.isWild(pokemon)) homeless.add(pokemon);
+            else pastureBees.putIfAbsent(pokemon, new Worker());
         }
     }
 
@@ -162,6 +180,11 @@ public class HivePokemon {
         if (++tick % 20 != 0) return;
         workers.entrySet().removeIf(entry -> entry.getKey().isRemoved());
         for (Map.Entry<PokemonEntity, Worker> entry : List.copyOf(workers.entrySet())) work(entry.getKey(), entry.getValue());
+        pastureBees.keySet().removeIf(Entity::isRemoved);
+        for (Map.Entry<PokemonEntity, Worker> entry : pastureBees.entrySet()) {
+            if (Config.PASTURE_BEES.get()) workInPasture(entry.getKey(), entry.getValue());
+            else comeOutOfPastureHive(entry.getKey()); // opção desligada com alguém dentro
+        }
         releaseRested(event.getServer());
         if (tick % 600 == 0 && Config.HIVE_POKEMON.get()) findHomes();
     }
@@ -228,14 +251,14 @@ public class HivePokemon {
     /** Tira a marca de morador: volta a ser um Pokémon abelha selvagem que pode adotar outra colmeia. */
     private static void leave(PokemonEntity pokemon) {
         pokemon.getPersistentData().remove(HIVE_KEY);
-        pokemon.getPersistentData().remove(NECTAR_KEY);
+        setNectar(pokemon, false);
         workers.remove(pokemon);
         if (PokemonAi.isWild(pokemon)) homeless.add(pokemon);
     }
 
     /** Pode morar aqui? Mesma colônia (ou colmeia vazia), com vaga, e só uma rainha. */
     private static boolean accepts(BlockEntity hive, String species, long now) {
-        if (memberCount(hive, now) >= MAX_PER_HIVE) return false;
+        if (memberCount(hive, now) >= MAX_PER_HIVE || hive.getPersistentData().getBoolean(PASTURE_OWNED_KEY)) return false;
         String colony = hive.getPersistentData().getString(COLONY_KEY);
         if (!colony.isEmpty() && !colony.equals(COLONY_OF.get(species))) return false;
         return !species.equals("vespiquen") || !hasMember(hive, "vespiquen");
@@ -293,7 +316,10 @@ public class HivePokemon {
         for (String id : List.copyOf(members.getAllKeys())) {
             if (!insideIds.contains(id) && now - members.getCompound(id).getLong("seen") > MEMBER_TIMEOUT) members.remove(id);
         }
-        if (members.isEmpty()) hive.getPersistentData().remove(COLONY_KEY);
+        if (members.isEmpty()) {
+            hive.getPersistentData().remove(COLONY_KEY);
+            hive.getPersistentData().remove(PASTURE_OWNED_KEY);
+        }
         return members.size();
     }
 
@@ -335,7 +361,7 @@ public class HivePokemon {
             if (hasNectar) {
                 // Com néctar: deixa o mel e descansa lá dentro um pouco, como as abelhas.
                 deposit(level, hivePos, hiveState, hasMember(hive, "vespiquen"));
-                pokemon.getPersistentData().putBoolean(NECTAR_KEY, false);
+                setNectar(pokemon, false);
                 enter(level, hive, pokemon, nightOrRain ? now : now + 200 + level.random.nextInt(400));
             } else {
                 enter(level, hive, pokemon, now); // à noite e na chuva, vão para dentro
@@ -344,23 +370,185 @@ public class HivePokemon {
         }
         worker.returningSince = -1;
 
+        visitFlowers(level, pokemon, worker, hivePos, null, now);
+    }
+
+    /**
+     * Vai até uma flor perto da colmeia, poliniza e fica com néctar. Devolve false se não houver flor.
+     * area limita as flores (a área do pasto), ou null.
+     */
+    private static boolean visitFlowers(ServerLevel level, PokemonEntity pokemon, Worker worker, BlockPos hivePos, AABB area, long now) {
         if (worker.flower == null || !level.getBlockState(worker.flower).is(BlockTags.FLOWERS) || now - worker.targetSince > GIVE_UP_TICKS) {
-            worker.flower = findFlower(level, hivePos);
+            worker.flower = findFlower(level, hivePos, area);
             worker.targetSince = now;
             worker.arrivedAt = -1;
-            if (worker.flower == null) return;
+            if (worker.flower == null) return false;
         }
         if (!pokemon.blockPosition().closerThan(worker.flower, 2.5)) {
             PokemonAi.walkTo(pokemon, worker.flower, 0.6f, 1);
-            return;
+            return true;
         }
         if (worker.arrivedAt < 0) worker.arrivedAt = now;
         level.sendParticles(ParticleTypes.FALLING_NECTAR, pokemon.getX(), pokemon.getY() + 0.5, pokemon.getZ(), 1, 0.2, 0.1, 0.2, 0);
         if (now - worker.arrivedAt >= POLLINATE_TICKS) {
             pollinate(level, worker.flower);
-            pokemon.getPersistentData().putBoolean(NECTAR_KEY, true);
+            setNectar(pokemon, true);
             worker.flower = null;
         }
+        return true;
+    }
+
+    /**
+     * Néctar no Pokémon. Além da nossa marca, põe a memória do Cobblemon que liga a textura de pólen
+     * (a tarefa memory_aspect do comportamento pokemon_bee transforma ela no aspect has_nectar).
+     */
+    private static void setNectar(PokemonEntity pokemon, boolean nectar) {
+        pokemon.getPersistentData().putBoolean(NECTAR_KEY, nectar);
+        if (nectar) pokemon.getBrain().setMemory(CobblemonMemories.HAS_NECTAR, true);
+        else pokemon.getBrain().eraseMemory(CobblemonMemories.HAS_NECTAR);
+    }
+
+    // ----- Pokémon abelha do pasto -----
+
+    /**
+     * Pokémon abelha de jogador num pasto: adota uma colmeia craftada na área do pasto, visita as flores de lá, leva
+     * mel para a colmeia e entra nela para descansar, à noite e na chuva. Não dá para tirar a entidade do mundo como
+     * nas selvagens (o Cobblemon tiraria o Pokémon do pasto), então ela fica escondida dentro da colmeia.
+     */
+    private static void workInPasture(PokemonEntity pokemon, Worker worker) {
+        PokemonPastureBlockEntity.Tethering tethering = pokemon.getTethering();
+        CompoundTag data = pokemon.getPersistentData();
+        if (tethering == null) {
+            comeOutOfPastureHive(pokemon);
+            data.remove(PASTURE_HIVE_KEY);
+            setNectar(pokemon, false);
+            return;
+        }
+        ServerLevel level = (ServerLevel) pokemon.level();
+        long now = level.getGameTime();
+        AABB area = tethering.getBox();
+
+        BlockPos hivePos = data.contains(PASTURE_HIVE_KEY) ? BlockPos.of(data.getLong(PASTURE_HIVE_KEY)) : null;
+        if (hivePos != null && level.isLoaded(hivePos) && !isPastureHive(level, hivePos, area)) {
+            comeOutOfPastureHive(pokemon); // colmeia quebrada ou fora da área
+            data.remove(PASTURE_HIVE_KEY);
+            hivePos = null;
+        }
+        if (data.contains(PASTURE_INSIDE_KEY)) {
+            if (hivePos == null) {
+                comeOutOfPastureHive(pokemon);
+            } else if (!level.isDay() || level.isRaining() || now < data.getLong(PASTURE_INSIDE_KEY)) {
+                hideInHive(pokemon, hivePos); // continua dentro (e reaplica o que não é salvo)
+                return;
+            } else {
+                comeOutOfPastureHive(pokemon);
+                return;
+            }
+        }
+        if (pokemon.isBusy()) return;
+        if (hivePos == null) {
+            if (now < worker.nextHiveSearch) return;
+            worker.nextHiveSearch = now + 600;
+            hivePos = findPastureHive(level, tethering, now);
+            if (hivePos == null) return;
+            data.putLong(PASTURE_HIVE_KEY, hivePos.asLong());
+        }
+        if (!level.isLoaded(hivePos)) return;
+        BlockEntity hive = level.getBlockEntity(hivePos);
+        BlockState hiveState = level.getBlockState(hivePos);
+        touch(hive, pokemon, now);
+        hive.getPersistentData().putBoolean(PASTURE_OWNED_KEY, true);
+
+        BlockPos entrance = entrance(level, hivePos, hiveState);
+        boolean atHive = pokemon.blockPosition().closerThan(entrance, 2.5) || pokemon.blockPosition().closerThan(hivePos, 2.5);
+        boolean nightOrRain = !level.isDay() || level.isRaining();
+        boolean hasNectar = data.getBoolean(NECTAR_KEY);
+        if (nightOrRain || hasNectar) {
+            if (worker.returningSince < 0) worker.returningSince = now;
+            // Se não achar caminho em um tempo, entra mesmo assim (como as selvagens).
+            if (!atHive && now - worker.returningSince <= RETURN_TIMEOUT_TICKS) {
+                PokemonAi.walkTo(pokemon, entrance, 0.6f, 1);
+                return;
+            }
+            worker.returningSince = -1;
+            if (pokemon.isPassenger() || pokemon.isVehicle()) return;
+            long exitAt = now; // à noite e na chuva, sai quando amanhecer ou parar de chover
+            if (hasNectar) {
+                // Com néctar: deixa o mel e descansa lá dentro um pouco, como as abelhas.
+                deposit(level, hivePos, hiveState, hasMember(hive, "vespiquen"));
+                setNectar(pokemon, false);
+                if (!nightOrRain) exitAt = now + 200 + level.random.nextInt(400);
+            }
+            data.putLong(PASTURE_INSIDE_KEY, exitAt);
+            worker.flower = null;
+            hideInHive(pokemon, hivePos);
+            level.playSound(null, hivePos, SoundEvents.BEEHIVE_ENTER, SoundSource.BLOCKS, 1f, 1f);
+            return;
+        }
+        worker.returningSince = -1;
+        if (visitFlowers(level, pokemon, worker, hivePos, area, now)) return;
+        // Sem flor: fica perto da colmeia.
+        if (!pokemon.blockPosition().closerThan(hivePos, STAY_NEAR_HIVE)) PokemonAi.walkTo(pokemon, entrance, 0.5f, 2);
+    }
+
+    /**
+     * Esconde o Pokémon do pasto dentro da colmeia: invisível, parado, sem colidir e sem levar dano. Só noPhysics não
+     * é salvo com a entidade, por isso tudo é reaplicado a cada checagem.
+     */
+    private static void hideInHive(PokemonEntity pokemon, BlockPos hivePos) {
+        PokemonAi.stop(pokemon);
+        pokemon.setInvisible(true);
+        pokemon.setNoAi(true);
+        pokemon.setNoGravity(true);
+        pokemon.setInvulnerable(true);
+        pokemon.setSilent(true);
+        pokemon.noPhysics = true;
+        pokemon.setDeltaMovement(Vec3.ZERO);
+        pokemon.moveTo(hivePos.getX() + 0.5, hivePos.getY() + 0.1, hivePos.getZ() + 0.5);
+    }
+
+    /** Tira o Pokémon do pasto de dentro da colmeia (se estiver lá) e põe na frente dela. */
+    private static void comeOutOfPastureHive(PokemonEntity pokemon) {
+        CompoundTag data = pokemon.getPersistentData();
+        if (!data.contains(PASTURE_INSIDE_KEY)) return;
+        data.remove(PASTURE_INSIDE_KEY);
+        pokemon.setInvisible(false);
+        pokemon.setNoAi(false);
+        pokemon.setNoGravity(false);
+        pokemon.setInvulnerable(false);
+        pokemon.setSilent(false);
+        pokemon.noPhysics = false;
+        ServerLevel level = (ServerLevel) pokemon.level();
+        BlockPos hivePos = data.contains(PASTURE_HIVE_KEY) ? BlockPos.of(data.getLong(PASTURE_HIVE_KEY)) : null;
+        if (hivePos == null || !level.isLoaded(hivePos)) return;
+        BlockState state = level.getBlockState(hivePos);
+        if (!state.is(BlockTags.BEEHIVES)) return; // colmeia quebrada: sai de onde está
+        BlockPos out = entrance(level, hivePos, state);
+        float yaw = state.hasProperty(BeehiveBlock.FACING) ? state.getValue(BeehiveBlock.FACING).toYRot() : 0f;
+        pokemon.moveTo(out.getX() + 0.5, out.getY(), out.getZ() + 0.5, yaw, 0f);
+        level.playSound(null, hivePos, SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1f, 1f);
+    }
+
+    /** Colmeia craftada (não ninho natural) dentro da área do pasto. */
+    private static boolean isPastureHive(ServerLevel level, BlockPos pos, AABB area) {
+        return level.getBlockState(pos).is(Blocks.BEEHIVE) && level.getBlockEntity(pos) instanceof BeehiveBlockEntity
+                && area.contains(Vec3.atCenterOf(pos));
+    }
+
+    /** A colmeia craftada mais perto do pasto, na área dele, sem colônia selvagem e com vaga. */
+    private static BlockPos findPastureHive(ServerLevel level, PokemonPastureBlockEntity.Tethering tethering, long now) {
+        return level.getPoiManager()
+                .findAllClosestFirstWithType(type -> type.is(PoiTypeTags.BEE_HOME), pos -> isPastureHive(level, pos, tethering.getBox()),
+                        tethering.getPasturePos(), PASTURE_HIVE_RADIUS, PoiManager.Occupancy.ANY)
+                .map(pair -> pair.getSecond())
+                .filter(pos -> {
+                    BlockEntity hive = level.getBlockEntity(pos);
+                    boolean wildColony = !hive.getPersistentData().getString(COLONY_KEY).isEmpty()
+                            && !hive.getPersistentData().getBoolean(PASTURE_OWNED_KEY);
+                    return !wildColony && inside(hive).isEmpty() && memberCount(hive, now) < MAX_PER_HIVE;
+                })
+                .findFirst()
+                .orElse(null);
     }
 
     // ----- Entrar e sair -----
@@ -465,10 +653,12 @@ public class HivePokemon {
         }
     }
 
-    private static BlockPos findFlower(ServerLevel level, BlockPos hive) {
+    private static BlockPos findFlower(ServerLevel level, BlockPos hive, AABB area) {
         List<BlockPos> flowers = new ArrayList<>();
         for (BlockPos pos : BlockPos.betweenClosed(hive.offset(-FLOWER_RADIUS, -5, -FLOWER_RADIUS), hive.offset(FLOWER_RADIUS, 3, FLOWER_RADIUS))) {
-            if (level.getBlockState(pos).is(BlockTags.FLOWERS)) flowers.add(pos.immutable());
+            if (level.getBlockState(pos).is(BlockTags.FLOWERS) && (area == null || area.contains(Vec3.atCenterOf(pos)))) {
+                flowers.add(pos.immutable());
+            }
         }
         return flowers.isEmpty() ? null : flowers.get(level.random.nextInt(flowers.size()));
     }

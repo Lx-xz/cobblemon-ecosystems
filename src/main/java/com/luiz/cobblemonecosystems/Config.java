@@ -15,6 +15,8 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue REMOVE_HOSTILE_ANIMALS;
     public static final ModConfigSpec.BooleanValue REMOVE_SLIMES;
     public static final ModConfigSpec.BooleanValue REMOVE_FROM_EXISTING_WORLDS;
+    public static final ModConfigSpec.BooleanValue SILVERFISH_DWEBBLE;
+    public static final ModConfigSpec.BooleanValue SPIDER_SPAWNER_NESTS;
     // ----- Vilas -----
     public static final ModConfigSpec.BooleanValue STRUCTURE_POKEMON;
     public static final ModConfigSpec.DoubleValue STRUCTURE_EVOLVED_CHANCE;
@@ -25,6 +27,14 @@ public final class Config {
     // ----- Mercador -----
     public static final ModConfigSpec.BooleanValue TRADER_POKEMON;
     public static final ModConfigSpec.BooleanValue TRADER_BATTLE;
+    // ----- Saqueadores e bruxas -----
+    public static final ModConfigSpec.BooleanValue WITCH_PET;
+    public static final ModConfigSpec.BooleanValue WITCH_BATTLE;
+    public static final ModConfigSpec.BooleanValue OUTPOST_CAPTIVES;
+    // ----- Pasto -----
+    public static final ModConfigSpec.BooleanValue PASTURE_RETURN;
+    public static final ModConfigSpec.BooleanValue PASTURE_BEES;
+    public static final ModConfigSpec.BooleanValue EGG_LAYERS;
     // ----- Comportamentos -----
     public static final ModConfigSpec.BooleanValue HIVE_POKEMON;
     public static final ModConfigSpec.BooleanValue DOG_HUNTERS;
@@ -53,6 +63,16 @@ public final class Config {
                 "Also remove matching mobs already saved in the world when their chunk loads (tamed pets included).",
                 "Também remove os mobs que já estavam salvos no mundo quando o chunk carrega (inclusive pets domados).")
                 .define("remove_from_existing_worlds", true);
+        SILVERFISH_DWEBBLE = BUILDER.comment(
+                "Silverfish become angry Dwebble: they come out of infested blocks, attack, and call the others hiding nearby.",
+                "Spawners of silverfish are replaced by a few Dwebble.",
+                "Traças viram Dwebble bravos: saem dos blocos infestados, atacam e chamam os outros escondidos por perto.")
+                .define("silverfish_dwebble", true);
+        SPIDER_SPAWNER_NESTS = BUILDER.comment(
+                "Spider spawners (mineshafts, dungeons) are removed and leave a nest of a few spider Pokémon of one species.",
+                "Only while hostile animals are removed. No endless spider Pokémon farms.",
+                "Spawners de aranha viram um ninho com alguns Pokémon aranha de uma espécie (sem farm infinita).")
+                .define("spider_spawner_nests", true);
         BUILDER.pop();
 
         BUILDER.comment("Villages / Vilas").push("villages");
@@ -92,14 +112,46 @@ public final class Config {
                 .define("trader_battle", true);
         BUILDER.pop();
 
+        BUILDER.comment("Illagers and witches / Saqueadores e bruxas").push("illagers");
+        WITCH_PET = BUILDER.comment(
+                "The swamp hut witch keeps the black Purrloin as her pet. She is neutral: she only attacks who attacks her.",
+                "If she dies, the Purrloin runs away. It can't be caught: battle the witch to win it.",
+                "A bruxa da cabana fica com o Purrloin preto. Ela é neutra; se morrer, o Purrloin foge (incapturável).")
+                .define("witch_pet", true);
+        WITCH_BATTLE = BUILDER.comment(
+                "Players can battle the swamp hut witch (sneak + right-click, or send out a Pokémon at her) and win her Purrloin.",
+                "Jogadores podem batalhar com a bruxa da cabana e ganhar o Purrloin dela.")
+                .define("witch_battle", true);
+        OUTPOST_CAPTIVES = BUILDER.comment(
+                "The iron golem cage of pillager outposts holds a captive Pokémon instead (needs village_guardians).",
+                "A jaula do golem nos postos de saqueadores guarda um Pokémon preso (precisa de village_guardians).")
+                .define("outpost_captives", true);
+        BUILDER.pop();
+
+        BUILDER.comment("Pasture Block / Bloco de pasto").push("pasture");
+        PASTURE_RETURN = BUILDER.comment(
+                "Pokémon that leave the pasture area walk back to it, instead of being sent back to the PC.",
+                "Pokémon que saem da área do pasto voltam andando, em vez de irem para o PC.")
+                .define("pasture_return", true);
+        PASTURE_BEES = BUILDER.comment(
+                "Bee Pokémon in a pasture use a crafted beehive inside the pasture area: they visit flowers, make honey and stay near it.",
+                "Pokémon abelha no pasto usam uma colmeia craftada na área: visitam flores, fazem mel e ficam perto dela.")
+                .define("pasture_bees", true);
+        EGG_LAYERS = BUILDER.comment(
+                "Female bird Pokémon that replace chickens (Doduo, Psyduck, Torchic, Delibird, Piplup and evolutions) lay eggs,",
+                "in village pens and in a pasture. Males don't.",
+                "Fêmeas das aves que substituem as galinhas botam ovos, nos currais e no pasto. Machos não.")
+                .define("egg_layers", true);
+        BUILDER.pop();
+
         BUILDER.comment("Behaviours / Comportamentos").push("behaviours");
         HIVE_POKEMON = BUILDER.comment(
                 "Combee, Vespiquen, Cutiefly and Ribombee live in beehives instead of bees.",
                 "Pokémon abelha moram nas colmeias no lugar das abelhas.")
                 .define("hive_pokemon", true);
         DOG_HUNTERS = BUILDER.comment(
-                "Dog Pokémon hunt skeletons; wild ones sometimes hunt wild sheep Pokémon.",
-                "Pokémon cachorro caçam esqueletos; os selvagens às vezes caçam Pokémon ovelha.")
+                "Dog Pokémon hunt skeletons; wild wolf Pokémon sometimes hunt wild sheep Pokémon.",
+                "Pokémon cachorro caçam esqueletos; os lobos selvagens às vezes caçam Pokémon ovelha.")
                 .define("dog_hunters", true);
         BUILDER.pop();
 
