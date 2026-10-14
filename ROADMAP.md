@@ -26,6 +26,12 @@ Legenda: `[x]` feito · `[ ]` a fazer · **(decidir)** precisa de decisão antes
 - [x] **Aldeões com Pokémon** (20% dos aldeões nascidos com a vila; por profissão; Honedge mais raro; pequenos ficam na cabeça)
 - [x] **Pokémon abelha nas colmeias** (Combee, Cutiefly, Ribombee e a rainha Vespiquen; visitam flores, polinizam e enchem a colmeia de mel)
 - [x] **Cachorros caçam esqueletos** (do jogador e selvagens); selvagens às vezes caçam Wooloo, Dubwool e Mareep selvagens
+- [x] Corrigido: cachorros e Golurk ficavam parados (trocar os comportamentos do cérebro do Cobblemon apagava andar,
+      olhar etc.). Agora a caçada é feita pelo próprio mod (`Hunts`): anda até o alvo e golpeia
+- [x] Golett e Golurk atacam mobs hostis como o golem de ferro (menos creepers), com golpe que joga para cima
+- [x] **Ícone de casinha** antes do nome dos Pokémon da vila incapturáveis (Golett, Golurk e Pokémon dos aldeões)
+- [x] Pokémon na cabeça do aldeão não sufocam quando ele passa por lugares baixos
+- [x] Combee que travava em cima da árvore: agora vai até a frente da colmeia e, se não achar caminho em 30 s, entra mesmo assim
 - [x] Gatos espantam creepers e phantoms, e esqueletos fogem de cachorros: **o Cobblemon já faz isso** (campo `entityInteract` das espécies)
 
 ---
@@ -96,13 +102,21 @@ mecânica sem substituto, ficam.
 ## 3. Devolver mecânicas que os animais faziam
 
 ### Abelhas e colmeias ⭐
-- [x] Combee, Vespiquen, Cutiefly e Ribombee moram nas colmeias e ninhos naturais
-- [x] Eles visitam flores e enchem a colmeia de mel, como as abelhas
-- [x] Polinização: uma plantação perto da flor cresce um estágio
-- [x] Vespiquen como "rainha": no máximo uma por colmeia, e com ela a colmeia às vezes enche dois níveis de uma vez
-- [ ] Mexer na colmeia sem fogueira embaixo deixa os Pokémon abelha bravos (com o revide da seção 6)
+- [x] Pokémon abelha moram nas colmeias e ninhos naturais (cada abelha guardada vira um morador, até 3)
+- [x] **Uma colônia por colmeia**, como os cercados: Combee (com no máximo uma rainha Vespiquen) ou Cutiefly (com Ribombee)
+- [x] Visitam flores, polinizam uma plantação perto e enchem a colmeia de mel
+- [x] Com a rainha Vespiquen, a colmeia às vezes enche dois níveis de uma vez
+- [x] **Entram na colmeia** à noite, na chuva e para descansar depois de levar mel (por isso não dormem do lado de fora)
+- [x] **Quebrar ou explodir a colmeia solta** quem estiver dentro
+- [x] **Ganhar e perder a colmeia**: Pokémon abelha selvagens sem casa adotam uma colmeia da mesma colônia com vaga
+      (até 16 blocos); perdem a casa se ela for quebrada; morador sumido (capturado, derrotado) libera a vaga
+- [ ] Bug corrigido a testar: abelhas do vanilla tentando sair sem parar (som infinito)
+- [ ] Mexer na colmeia sem fogueira embaixo deixa os moradores bravos (com o revide da seção 6)
 - [ ] **No pasto**: Pokémon abelha do jogador usam colmeias craftadas perto do pasto
-- [ ] **(decidir)** Beedrill: é vespa e não faz mel, mas poderia defender colmeias ou ninhos
+- [ ] Toque Suave: levar a colmeia com os Pokémon dentro (hoje quebrar sempre solta todos)
+- [ ] **(decidir)** Beedrill fora das colmeias (minha sugestão): é vespa, não faz mel
+  - Kakuna penduradas nas árvores de florestas, e Beedrill defendendo a área (seção 6, território)
+  - Ideia: Beedrill como predador que de vez em quando ataca colmeias de Combee, e a Vespiquen defende
 
 ### Gatos
 - [x] Creepers fogem de 29 Pokémon gato (Meowth, Persian, Skitty, Litten, Shinx...) — **já existe no Cobblemon**

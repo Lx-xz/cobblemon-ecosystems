@@ -4,5 +4,6 @@
   "package": "com.luiz.livingfaunaflora.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": ["CarvedPumpkinBlockMixin"],
+  "client": ["client.PokemonRendererMixin"],
   "injectors": { "defaultRequire": 1 }
 }

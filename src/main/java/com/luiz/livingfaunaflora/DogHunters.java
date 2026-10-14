@@ -39,7 +39,6 @@ public class DogHunters {
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         if (event.getLevel() instanceof ServerLevel && event.getEntity() instanceof PokemonEntity pokemon
                 && DOGS.contains(PokemonAi.species(pokemon))) {
-            PokemonAi.addBehaviours(pokemon, PokemonAi.HUNTER, PokemonAi.FIGHTS_MELEE);
             dogs.add(pokemon);
         }
     }
@@ -49,13 +48,18 @@ public class DogHunters {
         if (++tick % 20 != 0) return;
         dogs.removeIf(Entity::isRemoved);
         for (PokemonEntity dog : dogs) {
-            if (dog.isBusy() || PokemonAi.hasAttackTarget(dog)) continue;
+            if (dog.isBusy() || Hunts.isHunting(dog)) continue;
             LivingEntity target = nearestSkeleton(dog);
             if (target == null && PokemonAi.isWild(dog) && dog.getRandom().nextFloat() < SHEEP_HUNT_CHANCE) {
                 target = nearestWildSheep(dog);
             }
-            if (target != null) PokemonAi.attack(dog, target);
+            if (target != null) Hunts.start(dog, target, damage(dog), 0.1, 15);
         }
+    }
+
+    /** Golpe de 3 a ~9 de dano conforme o nível (lobo do vanilla dá 4). */
+    private static float damage(PokemonEntity dog) {
+        return 3f + dog.getPokemon().getLevel() / 15f;
     }
 
     private static LivingEntity nearestSkeleton(PokemonEntity dog) {

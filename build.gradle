@@ -12,6 +12,11 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 repositories {
     maven { url = 'https://maven.impactdev.net/repository/development/' } // Cobblemon
     maven { url = 'https://thedarkcolour.github.io/KotlinForForge/' }     // Kotlin for Forge (dependência do Cobblemon)
+    // Mods do Modrinth (só os de performance, para o jogo de teste)
+    exclusiveContent {
+        forRepository { maven { url = 'https://api.modrinth.com/maven' } }
+        filter { includeGroup 'maven.modrinth' }
+    }
 }
 
 neoForge {
@@ -38,6 +43,13 @@ dependencies {
     compileOnly 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
     // Kotlin for Forge: o Cobblemon precisa dele para carregar no runClient/runServer.
     runtimeOnly 'thedarkcolour:kotlinforforge-neoforge:5.12.0'
+
+    // Performance no runClient (não vão dentro do jar do mod). Ids exatos das versões no Modrinth:
+    runtimeOnly 'maven.modrinth:sodium:uMOpc5uV'        // mc1.21.1-0.8.13-neoforge: renderização
+    runtimeOnly 'maven.modrinth:lithium:DDUrRVCA'       // mc1.21.1-0.15.4-neoforge: lógica do servidor
+    runtimeOnly 'maven.modrinth:ferrite-core:x7kQWVju'  // 7.0.3-neoforge: memória
+    runtimeOnly 'maven.modrinth:modernfix:5HLHxQ2F'     // 5.27.24+mc1.21.1: carregamento e memória
+    runtimeOnly 'maven.modrinth:entityculling:8w8FfUPs' // 1.11.2: não desenha entidades escondidas
 }
 
 processResources {
@@ -47,3 +59,9 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+// Apaga jars de versões antigas antes de gerar o novo: o compat (../hollows_chasms_cavities) carrega
+// qualquer living-fauna-flora-*.jar daqui, e duas versões juntas não carregam.
+tasks.named('jar') {
+    doFirst { delete fileTree(destinationDirectory) { include "${project.archives_base_name}-*.jar" } }
+}

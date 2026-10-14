@@ -10,6 +10,7 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -19,6 +20,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
@@ -30,7 +32,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 @EventBusSubscriber(modid = LivingFaunaFlora.MOD_ID)
 public class VillagerCompanions {
     /** Chance de um aldeão da vila ter um Pokémon. */
-    private static final float ADOPT_CHANCE = 0.2f;
+    private static final float ADOPT_CHANCE = 0.5f;
     /** Chance de o Pokémon ser um "qualquer um" (segue o aldeão sem ligação com a profissão). */
     private static final float GENERIC_CHANCE = 0.2f;
     /** Honedge é o mais diferente: o ferreiro de armas só fica com ele nessa fração das vezes. */
@@ -87,7 +89,20 @@ public class VillagerCompanions {
                 && !villager.getPersistentData().hasUUID(COMPANION_KEY)) {
             waiting.add(villager);
         } else if (event.getEntity() instanceof PokemonEntity pokemon && pokemon.getPersistentData().hasUUID(VILLAGER_KEY)) {
+            PokemonAi.markAsVillagePokemon(pokemon); // também corrige nomes antigos
             companions.add(pokemon);
+        }
+    }
+
+    /**
+     * O aldeão passa por lugares com menos de 3 blocos de altura, e quem está na cabeça dele ficaria dentro do
+     * bloco. Pokémon de aldeão não sufocam.
+     */
+    @SubscribeEvent
+    public static void onIncomingDamage(LivingIncomingDamageEvent event) {
+        if (event.getEntity() instanceof PokemonEntity pokemon && event.getSource().is(DamageTypes.IN_WALL)
+                && pokemon.getPersistentData().hasUUID(VILLAGER_KEY)) {
+            event.setCanceled(true);
         }
     }
 
@@ -138,6 +153,7 @@ public class VillagerCompanions {
         pokemon.moveTo(villager.getX(), villager.getY(), villager.getZ(), villager.getYRot(), 0f);
         pokemon.getPersistentData().putUUID(VILLAGER_KEY, villager.getUUID());
         KeptPokemon.keep(pokemon);
+        PokemonAi.markAsVillagePokemon(pokemon);
         if (!level.addFreshEntity(pokemon)) return;
 
         villager.getPersistentData().putUUID(COMPANION_KEY, pokemon.getUUID());

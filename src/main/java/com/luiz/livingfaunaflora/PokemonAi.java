@@ -1,27 +1,29 @@
 package com.luiz.livingfaunaflora;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 /**
- * Atalhos para mandar no cérebro (Brain) dos Pokémon do Cobblemon. Eles não usam os "goals" antigos do
- * Minecraft: andam e brigam lendo memórias como WALK_TARGET e ATTACK_TARGET.
+ * Atalhos para os Pokémon do Cobblemon. Eles não usam os "goals" antigos do Minecraft: andam lendo a
+ * memória WALK_TARGET do cérebro (Brain). Não trocamos os comportamentos do cérebro (isso deixava o
+ * Pokémon parado); brigas são feitas pelo próprio mod em {@link Hunts}.
  */
 public final class PokemonAi {
-    public static final ResourceLocation FIGHTS_MELEE = ResourceLocation.fromNamespaceAndPath("cobblemon", "fights_melee");
-    public static final ResourceLocation ATTACK_HOSTILE_MOBS = ResourceLocation.fromNamespaceAndPath("cobblemon", "attack_hostile_mobs");
-    /** Nosso: entra no modo briga quando ATTACK_TARGET é preenchido (data/living_fauna_flora/behaviours/hunter.json). */
-    public static final ResourceLocation HUNTER = ResourceLocation.fromNamespaceAndPath(LivingFaunaFlora.MOD_ID, "hunter");
+    /** Fonte com o ícone da vila (assets/living_fauna_flora/font/icons.json), no caractere U+E000. */
+    private static final ResourceLocation ICON_FONT = ResourceLocation.fromNamespaceAndPath(LivingFaunaFlora.MOD_ID, "icons");
+    private static final String VILLAGE_ICON = "\uE000";
+    /** Marca dos Pokémon da vila, lida no cliente para desenhar o ícone. */
+    public static final String VILLAGE_ASPECT = "lff_village";
 
     private PokemonAi() {}
 
@@ -34,15 +36,6 @@ public final class PokemonAi {
         return pokemon.getOwnerUUID() == null;
     }
 
-    /** Liga comportamentos do Cobblemon só nesta entidade (os que ela já tem são mantidos). */
-    public static void addBehaviours(PokemonEntity pokemon, ResourceLocation... behaviours) {
-        Collection<ResourceLocation> missing = new ArrayList<>();
-        for (ResourceLocation behaviour : behaviours) {
-            if (!pokemon.getBehaviours().contains(behaviour)) missing.add(behaviour);
-        }
-        if (!missing.isEmpty()) pokemon.updateBehaviours(List.copyOf(missing));
-    }
-
     public static void walkTo(PokemonEntity pokemon, BlockPos pos, float speed, int closeEnough) {
         pokemon.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, speed, closeEnough));
     }
@@ -51,11 +44,26 @@ public final class PokemonAi {
         pokemon.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(target, speed, closeEnough));
     }
 
-    public static boolean hasAttackTarget(PokemonEntity pokemon) {
-        return pokemon.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent();
+    /**
+     * Marca os Pokémon da vila (incapturáveis) com o aspect {@link #VILLAGE_ASPECT}. As marcas vão para o
+     * cliente, e o {@code PokemonRendererMixin} desenha o ícone de casinha antes do nome, mesmo antes de
+     * escanear na Pokédex (quando o nome aparece como "???").
+     * Também limpa o apelido com ícone das versões antigas (ele só aparecia depois de escanear).
+     */
+    public static void markAsVillagePokemon(PokemonEntity pokemon) {
+        Set<String> aspects = new HashSet<>(pokemon.getPokemon().getForcedAspects());
+        if (aspects.add(VILLAGE_ASPECT)) {
+            pokemon.getPokemon().setForcedAspects(aspects);
+            pokemon.getPokemon().updateAspects();
+        }
+        if (pokemon.getPokemon().getNickname() != null
+                && pokemon.getPokemon().getNickname().getString().startsWith(VILLAGE_ICON)) {
+            pokemon.getPokemon().setNickname(null);
+        }
     }
 
-    public static void attack(PokemonEntity pokemon, LivingEntity target) {
-        pokemon.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, target);
+    /** O ícone de casinha, na fonte dele. */
+    public static MutableComponent villageIcon() {
+        return Component.literal(VILLAGE_ICON).withStyle(style -> style.withFont(ICON_FONT));
     }
 }
