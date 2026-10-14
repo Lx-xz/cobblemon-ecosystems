@@ -1,4 +1,4 @@
-package com.luiz.livingfaunaflora;
+package com.luiz.cobblemonecosystems;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -20,7 +20,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * selvagens, de vez em quando caçam Pokémon ovelha selvagens.
  * (Esqueletos fugirem deles e gatos espantarem creepers e phantoms o Cobblemon já faz sozinho.)
  */
-@EventBusSubscriber(modid = LivingFaunaFlora.MOD_ID)
+@EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class DogHunters {
     private static final Set<String> DOGS = Set.of(
             "growlithe", "arcanine", "lillipup", "herdier", "stoutland", "rockruff", "lycanroc",

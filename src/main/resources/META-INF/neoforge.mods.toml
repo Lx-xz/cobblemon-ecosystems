@@ -8,7 +8,7 @@ config = "${mod_id}.mixins.json"
 [[mods]]
 modId = "${mod_id}"
 version = "${mod_version}"
-displayName = "Cobblemon: Living Fauna & Flora"
+displayName = "Cobblemon Ecosystems"
 authors = "luiz"
 description = '''
 Os Pokémon passam a ser a fauna do mundo: substituem os animais do Minecraft e convivem com seus habitantes.

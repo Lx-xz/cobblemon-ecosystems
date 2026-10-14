@@ -1,4 +1,4 @@
-# Cobblemon Living Fauna & Flora — Roadmap
+# Cobblemon Ecosystems — Roadmap
 
 Ideia central: os Pokémon substituem os animais do Minecraft. O mundo não pode perder nenhuma mecânica do
 vanilla por causa disso, e os Pokémon devem parecer criaturas vivas, não só "mobs de batalha".
@@ -38,10 +38,10 @@ Legenda: `[x]` feito · `[ ]` a fazer · **(decidir)** precisa de decisão antes
 
 ## 1. Base do mod
 
-- [x] Renomear para **Cobblemon: Living Fauna & Flora** (mod id `living_fauna_flora`, pacote `com.luiz.livingfaunaflora`)
+- [x] Renomear para **Cobblemon Ecosystems** (mod id `cobblemon_ecosystems`, pacote `com.luiz.cobblemonecosystems`)
 - [ ] Arquivo de configuração simples para o jogador escolher (ver seção 1.1)
 
-### 1.1 Configuração (`config/living_fauna_flora.toml`)
+### 1.1 Configuração (`config/cobblemon_ecosystems.toml`)
 
 Rascunho das opções. Cada grupo é uma tag editável, então dá para ajustar mob por mob com datapack.
 
@@ -268,7 +268,7 @@ arrumar profissão (até 2 dias do jogo) para o Pokémon combinar com ela. Honed
 de armas; os outros ganham um "qualquer um").
 
 Teste rápido no jogo:
-`/summon minecraft:villager ~ ~ ~ {NeoForgeData:{"living_fauna_flora:adopt":1b,"living_fauna_flora:adopt_species":"pichu"}}`
+`/summon minecraft:villager ~ ~ ~ {NeoForgeData:{"cobblemon_ecosystems:adopt":1b,"cobblemon_ecosystems:adopt_species":"pichu"}}`
 
 | Profissão | Pokémon | Por quê |
 |---|---|---|

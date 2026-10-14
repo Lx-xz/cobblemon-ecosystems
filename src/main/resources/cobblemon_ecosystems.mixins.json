@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.luiz.cobblemonecosystems.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["CarvedPumpkinBlockMixin"],
+  "client": ["client.PokemonRendererMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

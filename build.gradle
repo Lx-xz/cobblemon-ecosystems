@@ -4,7 +4,7 @@ plugins {
 }
 
 version = project.mod_version
-group = 'com.luiz.livingfaunaflora'
+group = 'com.luiz.cobblemonecosystems'
 base { archivesName = project.archives_base_name }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -61,7 +61,7 @@ processResources {
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 
 // Apaga jars de versões antigas antes de gerar o novo: o compat (../hollows_chasms_cavities) carrega
-// qualquer living-fauna-flora-*.jar daqui, e duas versões juntas não carregam.
+// qualquer cobblemon-ecosystems-*.jar daqui, e duas versões juntas não carregam.
 tasks.named('jar') {
     doFirst { delete fileTree(destinationDirectory) { include "${project.archives_base_name}-*.jar" } }
 }

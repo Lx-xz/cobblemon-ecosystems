@@ -1,4 +1,4 @@
-package com.luiz.livingfaunaflora;
+package com.luiz.cobblemonecosystems;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * gato da cabana da bruxa) e os gatos de vila viram Pokémon parecidos, que ficam no lugar.
  * Animais do mesmo cercado viram a mesma espécie; alguns vêm evoluídos.
  */
-@EventBusSubscriber(modid = LivingFaunaFlora.MOD_ID)
+@EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class StructurePokemon {
     /** Uma linha evolutiva: a forma básica e a evoluída (ou null se não evolui). */
     private record Family(String base, String evolved) {}
@@ -51,17 +51,17 @@ public class StructurePokemon {
     /** Distância (em blocos) em que outro Pokémon conta como "do mesmo cercado". */
     private static final double SAME_PEN_RADIUS = 8;
 
-    private static final String REPLACE_KEY = LivingFaunaFlora.MOD_ID + ":replace";
+    private static final String REPLACE_KEY = CobblemonEcosystems.MOD_ID + ":replace";
     /** Guardados no Pokémon para os vizinhos copiarem a espécie: de qual animal veio e qual família virou. */
-    private static final String SOURCE_KEY = LivingFaunaFlora.MOD_ID + ":source";
-    private static final String FAMILY_KEY = LivingFaunaFlora.MOD_ID + ":family";
+    private static final String SOURCE_KEY = CobblemonEcosystems.MOD_ID + ":source";
+    private static final String FAMILY_KEY = CobblemonEcosystems.MOD_ID + ":family";
 
     private record Pending(ServerLevel level, EntityType<?> type, Vec3 pos, float yaw) {}
     private static final List<Pending> pending = new ArrayList<>();
 
     /**
      * Marca o animal na hora em que a estrutura o cria. Ele é salvo com a marca no chunk e, quando o
-     * chunk carregar, LivingFaunaFlora bloqueia o animal e chama replaceIfMarked() para pôr o Pokémon no lugar.
+     * chunk carregar, CobblemonEcosystems bloqueia o animal e chama replaceIfMarked() para pôr o Pokémon no lugar.
      */
     @SubscribeEvent
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
@@ -76,7 +76,7 @@ public class StructurePokemon {
         }
     }
 
-    /** Chamado por LivingFaunaFlora quando um animal bloqueado estava marcado para virar Pokémon. */
+    /** Chamado por CobblemonEcosystems quando um animal bloqueado estava marcado para virar Pokémon. */
     static void replaceIfMarked(Entity animal, ServerLevel level) {
         if (animal.getPersistentData().getBoolean(REPLACE_KEY)) {
             // Não dá para criar entidades no meio do evento de entrada; fica para o fim do tick.

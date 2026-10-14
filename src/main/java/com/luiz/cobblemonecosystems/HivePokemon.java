@@ -1,4 +1,4 @@
-package com.luiz.livingfaunaflora;
+package com.luiz.cobblemonecosystems;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +57,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  *
  * "Ser morador" é a marca HIVE_KEY no Pokémon mais a lista de moradores salva na colmeia.
  */
-@EventBusSubscriber(modid = LivingFaunaFlora.MOD_ID)
+@EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class HivePokemon {
     /** Espécie → colônia a que pertence. */
     private static final Map<String, String> COLONY_OF = Map.of(
@@ -81,12 +81,12 @@ public class HivePokemon {
     /** Morador que não aparece por esse tempo (com a colmeia carregada) deixa de contar: foi capturado ou derrotado. */
     private static final long MEMBER_TIMEOUT = 6000;
 
-    private static final String HIVE_KEY = LivingFaunaFlora.MOD_ID + ":hive";
-    private static final String NECTAR_KEY = LivingFaunaFlora.MOD_ID + ":nectar";
+    private static final String HIVE_KEY = CobblemonEcosystems.MOD_ID + ":hive";
+    private static final String NECTAR_KEY = CobblemonEcosystems.MOD_ID + ":nectar";
     /** Na colmeia: colônia, moradores (UUID → {seen, species}) e quem está dentro (entidade salva + hora de sair). */
-    private static final String COLONY_KEY = LivingFaunaFlora.MOD_ID + ":colony";
-    private static final String MEMBERS_KEY = LivingFaunaFlora.MOD_ID + ":members";
-    private static final String INSIDE_KEY = LivingFaunaFlora.MOD_ID + ":inside";
+    private static final String COLONY_KEY = CobblemonEcosystems.MOD_ID + ":colony";
+    private static final String MEMBERS_KEY = CobblemonEcosystems.MOD_ID + ":members";
+    private static final String INSIDE_KEY = CobblemonEcosystems.MOD_ID + ":inside";
 
     private record PendingSpawn(ServerLevel level, Vec3 pos, BlockPos hive) {}
     private record PendingRelease(ServerLevel level, BlockPos hive, ListTag inside) {}
@@ -110,7 +110,7 @@ public class HivePokemon {
 
     // ----- Entradas -----
 
-    /** Chamado por LivingFaunaFlora quando uma abelha bloqueada estava saindo de uma colmeia. */
+    /** Chamado por CobblemonEcosystems quando uma abelha bloqueada estava saindo de uma colmeia. */
     static void replaceIfFromHive(Entity entity, ServerLevel level) {
         if (entity instanceof Bee bee && bee.hasHive()) pendingSpawns.add(new PendingSpawn(level, bee.position(), bee.getHivePos()));
     }

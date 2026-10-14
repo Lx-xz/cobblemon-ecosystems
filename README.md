@@ -1,4 +1,4 @@
-# Cobblemon: Living Fauna & Flora
+# Cobblemon Ecosystems
 
 **Pokémon ecosystems for Cobblemon · Ecossistemas Pokémon para o Cobblemon**
 
@@ -107,7 +107,7 @@ A lista completa está no [ROADMAP.md](ROADMAP.md).
 ## Development · Desenvolvimento
 
 ```bash
-./gradlew build            # build/libs/living-fauna-flora-<version>.jar
+./gradlew build            # build/libs/cobblemon-ecosystems-<version>.jar
 ./gradlew runClient        # test client with Cobblemon and Kotlin for Forge
 ./gradlew runGameTestServer  # headless boot, checks that mods and mixins load
 ```

@@ -1,4 +1,4 @@
-package com.luiz.livingfaunaflora;
+package com.luiz.cobblemonecosystems;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,11 +19,11 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
  * Pokémon parado); brigas são feitas pelo próprio mod em {@link Hunts}.
  */
 public final class PokemonAi {
-    /** Fonte com o ícone da vila (assets/living_fauna_flora/font/icons.json), no caractere U+E000. */
-    private static final ResourceLocation ICON_FONT = ResourceLocation.fromNamespaceAndPath(LivingFaunaFlora.MOD_ID, "icons");
+    /** Fonte com o ícone da vila (assets/cobblemon_ecosystems/font/icons.json), no caractere U+E000. */
+    private static final ResourceLocation ICON_FONT = ResourceLocation.fromNamespaceAndPath(CobblemonEcosystems.MOD_ID, "icons");
     private static final String VILLAGE_ICON = "\uE000";
     /** Marca dos Pokémon da vila, lida no cliente para desenhar o ícone. */
-    public static final String VILLAGE_ASPECT = "lff_village";
+    public static final String VILLAGE_ASPECT = "ecosystems_village";
 
     private PokemonAi() {}
 

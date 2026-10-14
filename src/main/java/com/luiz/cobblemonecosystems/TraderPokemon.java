@@ -1,4 +1,4 @@
-package com.luiz.livingfaunaflora;
+package com.luiz.cobblemonecosystems;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,15 +22,15 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * O mercador ambulante chega com Pokémon de carga presos na guia, no lugar das lhamas.
  * Eles usam a manta do mercador, são incapturáveis e vão embora junto com ele.
  */
-@EventBusSubscriber(modid = LivingFaunaFlora.MOD_ID)
+@EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class TraderPokemon {
     /** Mudbray é um burrinho de carga. A manta só existe para o Mudbray (veja o resolver em assets/cobblemon). */
     private static final String PROPERTIES = "mudbray level=15 uncatchable";
     private static final int COUNT = 2;
     private static final String NAME = "Mudbray do Mercador";
-    /** Aspect que liga a camada da manta no resolver 1_living_fauna_flora_trader.json. */
-    private static final String BLANKET_ASPECT = "living_fauna_flora_trader";
-    private static final String OWNER_KEY = LivingFaunaFlora.MOD_ID + ":trader";
+    /** Aspect que liga a camada da manta no resolver 1_cobblemon_ecosystems_trader.json. */
+    private static final String BLANKET_ASPECT = "cobblemon_ecosystems_trader";
+    private static final String OWNER_KEY = CobblemonEcosystems.MOD_ID + ":trader";
 
     private static final List<WanderingTrader> newTraders = new ArrayList<>();
     private static final Set<PokemonEntity> owned = new HashSet<>();

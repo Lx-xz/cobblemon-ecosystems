@@ -1,4 +1,4 @@
-package com.luiz.livingfaunaflora;
+package com.luiz.cobblemonecosystems;
 
 import com.cobblemon.mod.common.api.entity.Despawner;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
@@ -9,9 +9,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 
 /** Pokémon criados pelo mod (do mercador ou das vilas) não somem sozinhos como os selvagens. */
-@EventBusSubscriber(modid = LivingFaunaFlora.MOD_ID)
+@EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class KeptPokemon {
-    private static final String KEEP_KEY = LivingFaunaFlora.MOD_ID + ":keep";
+    private static final String KEEP_KEY = CobblemonEcosystems.MOD_ID + ":keep";
 
     private static final Despawner<PokemonEntity> NEVER = new Despawner<>() {
         @Override public void beginTracking(PokemonEntity entity) {}

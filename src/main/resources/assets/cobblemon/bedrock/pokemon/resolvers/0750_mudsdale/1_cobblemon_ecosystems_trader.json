@@ -3,11 +3,11 @@
   "order": 1,
   "variations": [
     {
-      "aspects": ["living_fauna_flora_trader"],
+      "aspects": ["cobblemon_ecosystems_trader"],
       "layers": [
         {
           "name": "trader_blanket",
-          "texture": "living_fauna_flora:textures/pokemon/mudsdale_trader_blanket.png"
+          "texture": "cobblemon_ecosystems:textures/pokemon/mudsdale_trader_blanket.png"
         }
       ]
     }

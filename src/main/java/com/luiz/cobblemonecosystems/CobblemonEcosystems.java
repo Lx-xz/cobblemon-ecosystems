@@ -1,4 +1,4 @@
-package com.luiz.livingfaunaflora;
+package com.luiz.cobblemonecosystems;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -12,19 +12,19 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 
 /**
  * Remove os animais vanilla. Os spawns naturais são tirados dos biomas pelo biome modifier em
- * data/living_fauna_flora/neoforge/biome_modifier; aqui bloqueamos o resto (ovos, reprodução, gatos de vila,
+ * data/cobblemon_ecosystems/neoforge/biome_modifier; aqui bloqueamos o resto (ovos, reprodução, gatos de vila,
  * animais já salvos em mundos antigos...).
  */
-@Mod(LivingFaunaFlora.MOD_ID)
-@EventBusSubscriber(modid = LivingFaunaFlora.MOD_ID)
-public class LivingFaunaFlora {
-    public static final String MOD_ID = "living_fauna_flora";
+@Mod(CobblemonEcosystems.MOD_ID)
+@EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
+public class CobblemonEcosystems {
+    public static final String MOD_ID = "cobblemon_ecosystems";
 
-    /** Lista editável em data/living_fauna_flora/tags/entity_type/removed_animals.json (ou por datapack). */
+    /** Lista editável em data/cobblemon_ecosystems/tags/entity_type/removed_animals.json (ou por datapack). */
     public static final TagKey<EntityType<?>> REMOVED_ANIMALS =
             TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "removed_animals"));
 
-    public LivingFaunaFlora() {
+    public CobblemonEcosystems() {
         TraderBattle.registerCobblemonEvents();
     }
 

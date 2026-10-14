@@ -1,4 +1,4 @@
-package com.luiz.livingfaunaflora;
+package com.luiz.cobblemonecosystems;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,11 +43,11 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
  * ou lançar um Pokémon (tecla R) nele ou em um dos Mudbray.
  * Quem vence pode capturar um deles (só quem venceu, e só um por mercador).
  */
-@EventBusSubscriber(modid = LivingFaunaFlora.MOD_ID)
+@EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class TraderBattle {
     private static final String TRADER_NAME = "Mercador Ambulante";
     /** No mercador: quem já venceu ele. No Mudbray: quem pode capturá-lo. */
-    private static final String WINNER_KEY = LivingFaunaFlora.MOD_ID + ":winner";
+    private static final String WINNER_KEY = CobblemonEcosystems.MOD_ID + ":winner";
     private static final int AI_SKILL = 3;
     /** Lançar um Pokémon a até essa distância (em blocos) do mercador conta como desafio. */
     private static final double SEND_OUT_RADIUS = 2.5;
