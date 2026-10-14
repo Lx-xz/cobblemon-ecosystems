@@ -1,0 +1,11 @@
+{
+  "cobblemon_ecosystems.trader.name": "Wandering Trader",
+  "cobblemon_ecosystems.trader.mudbray": "Trader's Mudbray",
+  "cobblemon_ecosystems.trader.challenge": "A battle? If you win, you can take one of my Mudbray!",
+  "cobblemon_ecosystems.trader.victory": "You won! You can try to catch this Mudbray. Take good care of it!",
+  "cobblemon_ecosystems.trader.already_beaten": "You already beat me! Feel free to catch one of my Mudbray.",
+  "cobblemon_ecosystems.trader.no_pokemon": "I don't have any Pokémon to battle right now.",
+  "cobblemon_ecosystems.trader.party_fainted": "Your Pokémon are too tired to battle.",
+  "cobblemon_ecosystems.trader.not_your_prize": "This Mudbray is someone else's prize!",
+  "cobblemon_ecosystems.trader.wants_to_battle": "The Wandering Trader wants to battle you!"
+}

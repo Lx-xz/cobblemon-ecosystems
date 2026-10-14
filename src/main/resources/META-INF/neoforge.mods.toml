@@ -11,9 +11,9 @@ version = "${mod_version}"
 displayName = "Cobblemon Ecosystems"
 authors = "luiz"
 description = '''
-Os Pokémon passam a ser a fauna do mundo: substituem os animais do Minecraft e convivem com seus habitantes.
-Mercador com Mudbray de manta, vilas com Pokémon nos currais, Golett e Golurk guardiões, aldeões com
-Pokémon, Combee nas colmeias e cachorros caçando esqueletos.
+Pokémon become the wildlife of the world: they replace vanilla animals and live alongside Minecraft's inhabitants.
+Trader Mudbray with a blanket, village pens with Pokémon, Golett and Golurk guardians, villagers with Pokémon
+partners, Combee hives and dog Pokémon hunting skeletons.
 '''
 
 [[dependencies.${mod_id}]]

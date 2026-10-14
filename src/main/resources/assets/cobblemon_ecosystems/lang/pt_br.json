@@ -1,0 +1,11 @@
+{
+  "cobblemon_ecosystems.trader.name": "Mercador Ambulante",
+  "cobblemon_ecosystems.trader.mudbray": "Mudbray do Mercador",
+  "cobblemon_ecosystems.trader.challenge": "Uma batalha? Se você vencer, pode levar um dos meus Mudbray!",
+  "cobblemon_ecosystems.trader.victory": "Você venceu! Pode tentar capturar este Mudbray. Cuide bem dele!",
+  "cobblemon_ecosystems.trader.already_beaten": "Você já me venceu! Fique à vontade para capturar um dos meus Mudbray.",
+  "cobblemon_ecosystems.trader.no_pokemon": "Estou sem Pokémon para batalhar agora.",
+  "cobblemon_ecosystems.trader.party_fainted": "Seus Pokémon estão cansados demais para batalhar.",
+  "cobblemon_ecosystems.trader.not_your_prize": "Esse Mudbray é o prêmio de outra pessoa!",
+  "cobblemon_ecosystems.trader.wants_to_battle": "O Mercador Ambulante quer batalhar com você!"
+}

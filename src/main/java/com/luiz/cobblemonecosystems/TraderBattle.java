@@ -45,7 +45,8 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
  */
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class TraderBattle {
-    private static final String TRADER_NAME = "Mercador Ambulante";
+    /** Chave de tradução do nome. O Cobblemon trata o nome do treinador como chave e traduz na tela de batalha. */
+    private static final String TRADER_NAME = "cobblemon_ecosystems.trader.name";
     /** No mercador: quem já venceu ele. No Mudbray: quem pode capturá-lo. */
     private static final String WINNER_KEY = CobblemonEcosystems.MOD_ID + ":winner";
     private static final int AI_SKILL = 3;
@@ -96,21 +97,21 @@ public class TraderBattle {
     private static void challenge(ServerPlayer player, WanderingTrader trader, UUID leadingPokemon) {
         if (trader.isRemoved() || activeBattles.containsKey(trader)) return;
         if (trader.getPersistentData().hasUUID(WINNER_KEY)) {
-            say(player, "Você já me venceu! Fique à vontade para capturar um dos meus Mudbray.");
+            say(player, "already_beaten");
             return;
         }
         if (PlayerExtensionsKt.isInBattle(player)) return;
 
         List<PokemonEntity> pack = TraderPokemon.packOf(trader);
         if (pack.isEmpty()) {
-            say(player, "Estou sem Pokémon para batalhar agora.");
+            say(player, "no_pokemon");
             return;
         }
 
         PlayerPartyStore party = PlayerExtensionsKt.party(player);
         List<BattlePokemon> playerTeam = party.toBattleTeam(false, false, leadingPokemon);
         if (playerTeam.stream().allMatch(p -> p.getOriginalPokemon().isFainted())) {
-            say(player, "Seus Pokémon estão cansados demais para batalhar.");
+            say(player, "party_fainted");
             return;
         }
 
@@ -119,7 +120,7 @@ public class TraderBattle {
                 .map(p -> BattlePokemon.Companion.safeCopyOf(p.getPokemon()))
                 .toList();
 
-        say(player, "Uma batalha? Se você vencer, pode levar um dos meus Mudbray!");
+        say(player, "challenge");
         BattleRegistry.startBattle(
                 BattleFormat.Companion.getGEN_9_SINGLES(),
                 new BattleSide(new PlayerBattleActor(player.getUUID(), playerTeam)),
@@ -158,7 +159,7 @@ public class TraderBattle {
                 }
             }
             if (trader != null && player != null) {
-                event.setReason(Component.literal("O Mercador Ambulante quer batalhar com você!"));
+                event.setReason(Component.translatable("cobblemon_ecosystems.trader.wants_to_battle"));
                 event.cancel();
                 pendingChallenges.add(new Challenge(player, trader, leading));
             }
@@ -199,7 +200,7 @@ public class TraderBattle {
             Entity thrower = event.getPokeBall().getOwner();
             if (thrower == null || !thrower.getUUID().equals(pokemon.getPersistentData().getUUID(WINNER_KEY))) {
                 event.cancel();
-                if (thrower instanceof ServerPlayer player) say(player, "Esse Mudbray é o prêmio de outra pessoa!");
+                if (thrower instanceof ServerPlayer player) say(player, "not_your_prize");
             }
         });
 
@@ -218,7 +219,7 @@ public class TraderBattle {
         PokemonEntity prize = pack.get(0);
         UncatchableProperty.INSTANCE.catchable().apply(prize);
         prize.getPersistentData().putUUID(WINNER_KEY, player.getUUID());
-        say(player, "Você venceu! Pode tentar capturar este Mudbray. Cuide bem dele!");
+        say(player, "victory");
     }
 
     private static WanderingTrader findTrader(UUID uuid) {
@@ -235,8 +236,10 @@ public class TraderBattle {
         return server == null ? null : server.getPlayerList().getPlayer(uuid);
     }
 
+    /** Fala do mercador no chat. message é o fim da chave de tradução (cobblemon_ecosystems.trader.<message>). */
     private static void say(ServerPlayer player, String message) {
-        player.sendSystemMessage(Component.literal("<" + TRADER_NAME + "> ").withStyle(ChatFormatting.BLUE)
-                .append(Component.literal(message).withStyle(ChatFormatting.WHITE)));
+        player.sendSystemMessage(Component.literal("<").append(Component.translatable(TRADER_NAME)).append("> ")
+                .withStyle(ChatFormatting.BLUE)
+                .append(Component.translatable("cobblemon_ecosystems.trader." + message).withStyle(ChatFormatting.WHITE)));
     }
 }

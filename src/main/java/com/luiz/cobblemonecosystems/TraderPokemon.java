@@ -27,7 +27,8 @@ public class TraderPokemon {
     /** Mudbray é um burrinho de carga. A manta só existe para o Mudbray (veja o resolver em assets/cobblemon). */
     private static final String PROPERTIES = "mudbray level=15 uncatchable";
     private static final int COUNT = 2;
-    private static final String NAME = "Mudbray do Mercador";
+    /** Chave de tradução do apelido ("Trader's Mudbray" / "Mudbray do Mercador"). */
+    private static final String NAME = "cobblemon_ecosystems.trader.mudbray";
     /** Aspect que liga a camada da manta no resolver 1_cobblemon_ecosystems_trader.json. */
     private static final String BLANKET_ASPECT = "cobblemon_ecosystems_trader";
     private static final String OWNER_KEY = CobblemonEcosystems.MOD_ID + ":trader";
@@ -65,7 +66,7 @@ public class TraderPokemon {
             PokemonEntity pokemon = PokemonProperties.Companion.parse(PROPERTIES).createEntity(level);
             pokemon.getPokemon().setForcedAspects(new HashSet<>(Set.of(BLANKET_ASPECT)));
             pokemon.getPokemon().updateAspects();
-            pokemon.getPokemon().setNickname(Component.literal(NAME));
+            pokemon.getPokemon().setNickname(Component.translatable(NAME));
 
             double x = trader.getX() + level.random.nextInt(5) - 2;
             double z = trader.getZ() + level.random.nextInt(5) - 2;
