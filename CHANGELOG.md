@@ -1,6 +1,6 @@
 # Changelog
 
-## Next update · Próxima atualização
+## 1.1.0
 
 <details>
 <summary><b>🇺🇸 English</b></summary>
