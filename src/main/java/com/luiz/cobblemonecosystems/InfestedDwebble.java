@@ -104,8 +104,10 @@ public class InfestedDwebble {
     }
 
     static PokemonEntity spawn(ServerLevel level, Vec3 pos) {
+        ConfigLists.Family family = ConfigLists.pick(ConfigLists.families(Config.INFESTED_POKEMON), level.random);
+        if (family == null) return null;
         int pokemonLevel = MIN_LEVEL + level.random.nextInt(MAX_LEVEL - MIN_LEVEL + 1);
-        PokemonEntity dwebble = PokemonProperties.Companion.parse("dwebble level=" + pokemonLevel).createEntity(level);
+        PokemonEntity dwebble = PokemonProperties.Companion.parse(family.base() + " level=" + pokemonLevel).createEntity(level);
         dwebble.moveTo(pos.x, pos.y, pos.z, level.random.nextFloat() * 360f, 0f);
         dwebble.getPersistentData().putLong(ANGRY_UNTIL_KEY, level.getGameTime() + ANGRY_TICKS);
         if (!level.addFreshEntity(dwebble)) return null;

@@ -6,6 +6,13 @@
 <summary><b>🇺🇸 English</b></summary>
 
 ### New
+- **Pasture habitats**: the space Pokémon can reach around the Pasture Block (up to 10 blocks, walls and fences close it) is their home
+  - Each type likes and dislikes some surroundings: Fire likes lava and magma and dislikes water, Water likes a pool, Grass likes plants and open sky, Steel likes iron blocks... Some species have their own taste (Zubat and Woobat like darkness and a roof)
+  - That sets how comfortable each Pokémon is: Happy, Comfortable, Neutral or Uncomfortable. Cramped pastures make them less comfortable
+  - Happy Pokémon show green sparkles; uncomfortable or lost ones shed tears
+  - **See the habitat**: a new house button in the Pokémon interaction wheel, or sneak + right-click a pastured Pokémon holding the Pokédex
+  - **Temperament by nature**: homebodies barely leave the habitat, explorers roam far; everyone comes home at their species' bedtime (nocturnal ones in the morning). A Pokémon that can't find its way back gets sad for a while
+  - Everything is editable in the config: radius, block groups, what each type likes, the two-type rule and the natures
 - **In-game config screen**: Mods → Cobblemon Ecosystems → Config, with translated names
 - **Pasture Pokémon walk back** to the pasture when they leave its area, instead of being sent to the PC (no more fences needed)
 - **Pasture bees**: bee Pokémon in a pasture use a crafted beehive in the pasture area, visit the flowers there (getting covered in pollen), make honey and rest inside it at night and in the rain, still in the pasture
@@ -18,6 +25,7 @@
 - **Silverfish become Dwebble**: angry Dwebble come out of infested blocks, attack, and call the others hiding nearby
 - **Spawners become nests**: spider spawners leave a nest of 3 to 5 spider Pokémon of one species (Spinarak, Joltik or Tarountula); the stronghold silverfish spawner leaves Dwebble
 - New config options for each of these
+- **Editable lists in the config**: which mobs are removed (ids, tags and exceptions), the Pokémon of each village pen by village type, villager partners by profession, head riders, spider nests, infested blocks, outpost captives, the witch's team, egg-laying species, and dog, wolf and sheep Pokémon. Weights set how common each one is
 
 ### Changed
 - Only **female** birds lay eggs
@@ -30,6 +38,13 @@
 <summary><b>🇧🇷 Português</b></summary>
 
 ### Novidades
+- **Habitats do pasto**: o espaço que os Pokémon alcançam em volta do bloco do pasto (até 10 blocos, paredes e cercas fecham) é a casa deles
+  - Cada tipo gosta e não gosta de certas coisas em volta: Fogo gosta de lava e magma e não gosta de água, Água gosta de uma piscina, Planta gosta de plantas e céu aberto, Metal gosta de blocos de ferro... Algumas espécies têm gosto próprio (Zubat e Woobat gostam de escuro e de teto)
+  - Isso decide o conforto de cada Pokémon: Feliz, Confortável, Neutro ou Desconfortável. Pasto apertado deixa menos confortável
+  - Pokémon felizes soltam brilhos verdes; desconfortáveis ou perdidos choram
+  - **Ver o habitat**: botão novo de casinha no menu radial do Pokémon, ou agache e clique com o botão direito num Pokémon do pasto segurando a Pokédex
+  - **Temperamento pela natureza**: caseiros quase não saem do habitat, exploradores passeiam longe; todos voltam para casa na hora de dormir da espécie (os noturnos, de manhã). Quem não acha o caminho de volta fica triste por um tempo
+  - Tudo editável na configuração: raio, grupos de blocos, do que cada tipo gosta, a regra dos dois tipos e as naturezas
 - **Tela de configuração no jogo**: Mods → Cobblemon Ecosystems → Config, com nomes traduzidos
 - **Pokémon do pasto voltam andando** quando saem da área, em vez de irem para o PC (não precisa mais cercar)
 - **Abelhas no pasto**: Pokémon abelha no pasto usam uma colmeia craftada na área dele, visitam as flores de lá (ficando cobertos de pólen), fazem mel e descansam dentro dela à noite e na chuva, sem sair do pasto
@@ -42,6 +57,7 @@
 - **Traças viram Dwebble**: Dwebble bravos saem dos blocos infestados, atacam e chamam os outros escondidos por perto
 - **Spawners viram ninhos**: spawners de aranha deixam um ninho com 3 a 5 Pokémon aranha de uma espécie (Spinarak, Joltik ou Tarountula); o spawner de traça da fortaleza deixa Dwebble
 - Opções novas na configuração para cada uma dessas
+- **Listas editáveis na configuração**: quais mobs saem (ids, tags e exceções), os Pokémon de cada curral por tipo de vila, os Pokémon dos aldeões por profissão, quem anda na cabeça, ninhos de aranha, blocos infestados, Pokémon presos nos postos, o time da bruxa, espécies que botam ovos e os Pokémon cachorro, lobo e ovelha. Os pesos dizem o quanto cada um é comum
 
 ### Mudanças
 - Só as **fêmeas** das aves botam ovos

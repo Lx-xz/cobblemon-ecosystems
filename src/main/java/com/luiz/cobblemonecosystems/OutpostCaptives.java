@@ -20,11 +20,6 @@ import net.minecraft.world.phys.Vec3;
  * pode batalhar e capturar. As jaulas de allay continuam como estão.
  */
 public final class OutpostCaptives {
-    /** Pokémon que os saqueadores levariam: fortes, raros ou úteis. Pesos: o Golett, parente do golem, é o mais comum. */
-    private record Captive(String species, int weight) {}
-    private static final List<Captive> CAPTIVES = List.of(
-            new Captive("golett", 25), new Captive("growlithe", 15), new Captive("ponyta", 12), new Captive("mudbray", 12),
-            new Captive("riolu", 10), new Captive("eevee", 10), new Captive("larvitar", 8), new Captive("absol", 8));
     private static final int MIN_LEVEL = 15, MAX_LEVEL = 30;
 
     private OutpostCaptives() {}
@@ -36,7 +31,9 @@ public final class OutpostCaptives {
 
     static void spawn(ServerLevel level, Vec3 pos, float yaw) {
         RandomSource random = level.random;
-        String species = pick(random);
+        ConfigLists.Family captive = ConfigLists.pick(ConfigLists.families(Config.OUTPOST_CAPTIVE_POKEMON), random);
+        if (captive == null) return;
+        String species = captive.base();
         int pokemonLevel = MIN_LEVEL + random.nextInt(MAX_LEVEL - MIN_LEVEL + 1);
         PokemonEntity pokemon = PokemonProperties.Companion.parse(species + " level=" + pokemonLevel).createEntity(level);
         pokemon.moveTo(pos.x, pos.y, pos.z, yaw, 0f);
@@ -44,12 +41,4 @@ public final class OutpostCaptives {
         level.addFreshEntity(pokemon);
     }
 
-    private static String pick(RandomSource random) {
-        int roll = random.nextInt(CAPTIVES.stream().mapToInt(Captive::weight).sum());
-        for (Captive captive : CAPTIVES) {
-            roll -= captive.weight();
-            if (roll < 0) return captive.species();
-        }
-        return CAPTIVES.get(0).species();
-    }
 }

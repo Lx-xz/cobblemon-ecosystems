@@ -1,5 +1,6 @@
 package com.luiz.cobblemonecosystems;
 
+import com.luiz.cobblemonecosystems.ConfigLists.Family;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -56,8 +57,6 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 public class VillagerCompanions {
     /** Chance de o Pokémon ser um "qualquer um" (segue o aldeão sem ligação com a profissão). */
     private static final float GENERIC_CHANCE = 0.2f;
-    /** Honedge é o mais diferente: o ferreiro de armas só fica com ele nessa fração das vezes. */
-    private static final float HONEDGE_CHANCE = 0.35f;
     // Os tempos usam o horário do dia (getDayTime): dormir e o /time contam, como o jogador espera de "dias".
     /** Sem profissão até este tempo (2 dias do jogo), adota mesmo assim. */
     private static final long MAX_WAIT_FOR_JOB = 48000;
@@ -70,28 +69,22 @@ public class VillagerCompanions {
     /** Chance, a cada 2 segundos com os dois perto, de o aldeão fazer carinho no Pokémon. */
     private static final float PET_CHANCE = 1f / 12;
 
-    private static final List<String> GENERIC = List.of("pidgey", "pichu");
-    private static final List<String> BABY = List.of("pichu", "togepi");
-    private static final List<String> NO_JOB = List.of("slowpoke", "psyduck");
-    static final Map<VillagerProfession, List<String>> BY_PROFESSION = Map.ofEntries(
-            Map.entry(VillagerProfession.ARMORER, List.of("aron", "aron", "lairon")),
-            Map.entry(VillagerProfession.WEAPONSMITH, List.of("honedge")),
-            Map.entry(VillagerProfession.TOOLSMITH, List.of("klefki", "roggenrola")),
-            Map.entry(VillagerProfession.MASON, List.of("timburr")),
-            Map.entry(VillagerProfession.FLETCHER, List.of("rowlet")),
-            Map.entry(VillagerProfession.FARMER, List.of("bulbasaur", "oddish", "skiddo")),
-            Map.entry(VillagerProfession.FISHERMAN, List.of("wingull")),
-            Map.entry(VillagerProfession.SHEPHERD, List.of("wooloo", "mareep")),
-            Map.entry(VillagerProfession.CLERIC, List.of("chansey", "audino")),
-            Map.entry(VillagerProfession.LIBRARIAN, List.of("abra", "natu")),
-            Map.entry(VillagerProfession.CARTOGRAPHER, List.of("hoothoot", "pidgey")),
-            Map.entry(VillagerProfession.LEATHERWORKER, List.of("smeargle")),
-            Map.entry(VillagerProfession.BUTCHER, List.of("farfetchd")),
-            Map.entry(VillagerProfession.NITWIT, NO_JOB),
-            Map.entry(VillagerProfession.NONE, NO_JOB)
-    );
-    /** Pequenos o bastante para andar na cabeça do aldeão. */
-    static final Set<String> HEAD_RIDERS = Set.of("pichu", "pidgey", "natu", "rowlet", "togepi");
+    /** Na lista villager_partners: "baby" é para criança, "any" é o grupo de qualquer aldeão e "*" sorteia do "any". */
+    private static final String BABY = "baby", ANY = "any", FROM_ANY = "*";
+
+    /** As opções da configuração para essa chave (profissão, "baby" ou "any"). */
+    private static List<Family> partners(String key) {
+        return ConfigLists.keyed(Config.VILLAGER_PARTNERS).getOrDefault(key, List.of());
+    }
+
+    private static List<Family> partners(VillagerProfession profession) {
+        List<Family> options = partners(profession.name());
+        return options.isEmpty() ? partners(ANY) : options;
+    }
+
+    static boolean ridesOnHead(String species) {
+        return ConfigLists.species(Config.HEAD_RIDERS).contains(species);
+    }
 
     /** Quão desafiador o aldeão é: decide se aceita batalhas, a força e o tamanho do time. */
     enum Personality {
@@ -214,7 +207,7 @@ public class VillagerCompanions {
             if (pokemon.isBusy() || Hunts.isHunting(pokemon)) return false;
             if (defend(villager, pokemon)) return false;
             // Quem anda na cabeça desceu para lutar: sobe de novo quando estiver perto.
-            if (!pokemon.isPassenger() && HEAD_RIDERS.contains(PokemonAi.species(pokemon)) && pokemon.distanceTo(villager) < 3) {
+            if (!pokemon.isPassenger() && ridesOnHead(PokemonAi.species(pokemon)) && pokemon.distanceTo(villager) < 3) {
                 pokemon.startRiding(villager, true);
             }
             if (!pokemon.isPassenger()) {
@@ -305,6 +298,7 @@ public class VillagerCompanions {
         RandomSource random = level.random;
         Personality personality = personalityOf(villager, random);
         String species = chooseSpecies(villager, random);
+        if (species == null) return;
         PokemonEntity pokemon = PokemonProperties.Companion
                 .parse(species + " level=" + personality.rollLevel(random) + " uncatchable")
                 .createEntity(level);
@@ -319,7 +313,7 @@ public class VillagerCompanions {
         rollTeam(villager, personality, species, random);
         companions.add(pokemon);
         owners.add(villager);
-        if (HEAD_RIDERS.contains(species)) pokemon.startRiding(villager, true);
+        if (ridesOnHead(species)) pokemon.startRiding(villager, true);
     }
 
     /** A personalidade do aldeão; sorteada pela profissão na primeira vez (inclusive para pets de versões antigas). */
@@ -350,12 +344,13 @@ public class VillagerCompanions {
 
     /** O resto do time (fica na Pokébola, só aparece na batalha), salvo como propriedades do Cobblemon. */
     static void rollTeam(Villager villager, Personality personality, String shownSpecies, RandomSource random) {
-        List<String> pool = new ArrayList<>(BY_PROFESSION.getOrDefault(villager.getVillagerData().getProfession(), GENERIC));
-        pool.addAll(GENERIC);
-        if (pool.size() > 1) pool.remove(shownSpecies);
+        List<Family> pool = new ArrayList<>(partners(villager.getVillagerData().getProfession()));
+        pool.addAll(partners(ANY));
+        pool.removeIf(family -> family.base().equals(FROM_ANY));
+        if (pool.size() > 1) pool.removeIf(family -> family.base().equals(shownSpecies));
         ListTag team = new ListTag();
-        for (int i = 0; i < personality.extraPokemon; i++) {
-            team.add(StringTag.valueOf(pick(pool, random) + " level=" + personality.rollLevel(random)));
+        for (int i = 0; i < personality.extraPokemon && !pool.isEmpty(); i++) {
+            team.add(StringTag.valueOf(ConfigLists.pick(pool, random).base() + " level=" + personality.rollLevel(random)));
         }
         villager.getPersistentData().put(TEAM_KEY, team);
     }
@@ -401,22 +396,22 @@ public class VillagerCompanions {
             }
             if (!level.addFreshEntity(entity) || !(entity instanceof PokemonEntity pokemon)) return;
             level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 0.6f, 1.4f);
-            if (HEAD_RIDERS.contains(PokemonAi.species(pokemon))) pokemon.startRiding(villager, true);
+            if (ridesOnHead(PokemonAi.species(pokemon))) pokemon.startRiding(villager, true);
         });
     }
 
+    /** A espécie do pet, ou null se a configuração não tiver nenhuma opção para esse aldeão. */
     private static String chooseSpecies(Villager villager, RandomSource random) {
         String forced = villager.getPersistentData().getString(ADOPT_SPECIES_KEY);
         if (!forced.isEmpty()) return forced;
-        if (villager.isBaby()) return pick(BABY, random);
-        if (random.nextFloat() < GENERIC_CHANCE) return pick(GENERIC, random);
-
-        VillagerProfession profession = villager.getVillagerData().getProfession();
-        if (profession == VillagerProfession.WEAPONSMITH && random.nextFloat() >= HONEDGE_CHANCE) return pick(GENERIC, random);
-        return pick(BY_PROFESSION.getOrDefault(profession, GENERIC), random);
+        if (villager.isBaby()) return pickSpecies(partners(BABY), random);
+        if (random.nextFloat() < GENERIC_CHANCE) return pickSpecies(partners(ANY), random);
+        String species = pickSpecies(partners(villager.getVillagerData().getProfession()), random);
+        return FROM_ANY.equals(species) ? pickSpecies(partners(ANY), random) : species;
     }
 
-    private static String pick(List<String> options, RandomSource random) {
-        return options.get(random.nextInt(options.size()));
+    private static String pickSpecies(List<Family> options, RandomSource random) {
+        Family family = ConfigLists.pick(options, random);
+        return family == null ? null : family.base();
     }
 }

@@ -13,8 +13,9 @@ import net.neoforged.neoforge.common.world.BiomeModifier;
 import net.neoforged.neoforge.common.world.ModifiableBiomeInfo;
 
 /**
- * Quais mobs saem do jogo, de acordo com a configuração. Três grupos, cada um com sua tag (editável por datapack):
- * passivos, hostis e slimes. O golem de ferro sai junto com o módulo dos guardiões da vila.
+ * Quais mobs saem do jogo, de acordo com a configuração. Três grupos, cada um com sua lista na configuração
+ * (que por padrão aponta para uma tag, editável por datapack): passivos, hostis e slimes. O golem de ferro sai
+ * junto com o módulo dos guardiões da vila.
  */
 public final class Removal {
     public static final TagKey<EntityType<?>> PASSIVE = tag("removed_animals");
@@ -29,9 +30,9 @@ public final class Removal {
 
     public static boolean shouldRemove(EntityType<?> type) {
         if (type == EntityType.IRON_GOLEM) return Config.VILLAGE_GUARDIANS.get();
-        return (Config.REMOVE_PASSIVE_ANIMALS.get() && type.is(PASSIVE))
-                || (Config.REMOVE_HOSTILE_ANIMALS.get() && type.is(HOSTILE))
-                || (Config.REMOVE_SLIMES.get() && type.is(SLIMES));
+        return (Config.REMOVE_PASSIVE_ANIMALS.get() && ConfigLists.mobs(Config.PASSIVE_ANIMALS_LIST).matches(type))
+                || (Config.REMOVE_HOSTILE_ANIMALS.get() && ConfigLists.mobs(Config.HOSTILE_ANIMALS_LIST).matches(type))
+                || (Config.REMOVE_SLIMES.get() && ConfigLists.mobs(Config.SLIMES_LIST).matches(type));
     }
 
     /**

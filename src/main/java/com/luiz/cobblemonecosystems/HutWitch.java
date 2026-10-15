@@ -76,7 +76,6 @@ public class HutWitch {
     private static final int AI_SKILL = 3;
     private static final double SEND_OUT_RADIUS = 2.5;
     /** O resto do time da bruxa (um deles, na Pokébola): Pokémon sombrios, de bruxaria. */
-    private static final List<String> EXTRA_TEAM = List.of("murkrow", "misdreavus", "gastly");
 
     private static final double CLAIM_RADIUS = 16;
     private static final double FOLLOW_DISTANCE = 6;
@@ -412,9 +411,11 @@ public class HutWitch {
         int level = pet.getPokemon().getLevel();
         List<BattlePokemon> witchTeam = new ArrayList<>();
         witchTeam.add(BattlePokemon.Companion.safeCopyOf(pet.getPokemon()));
-        String extra = EXTRA_TEAM.get(random.nextInt(EXTRA_TEAM.size()));
-        witchTeam.add(BattlePokemon.Companion.safeCopyOf(
-                PokemonProperties.Companion.parse(extra + " level=" + Math.max(5, level - 2 + random.nextInt(5))).create()));
+        ConfigLists.Family extra = ConfigLists.pick(ConfigLists.families(Config.WITCH_BATTLE_TEAM), random);
+        if (extra != null) {
+            witchTeam.add(BattlePokemon.Companion.safeCopyOf(
+                    PokemonProperties.Companion.parse(extra.base() + " level=" + Math.max(5, level - 2 + random.nextInt(5))).create()));
+        }
 
         say(player, "challenge");
         BattleRegistry.startBattle(

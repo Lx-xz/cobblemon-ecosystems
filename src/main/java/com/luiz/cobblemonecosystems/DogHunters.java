@@ -22,13 +22,6 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  */
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class DogHunters {
-    private static final Set<String> DOGS = Set.of(
-            "growlithe", "arcanine", "lillipup", "herdier", "stoutland", "rockruff", "lycanroc",
-            "poochyena", "mightyena", "houndour", "houndoom", "electrike", "manectric",
-            "yamper", "boltund", "maschiff", "mabosstiff", "snubbull", "granbull", "fidough", "dachsbun");
-    /** Os lobos entre os cachorros: só eles caçam ovelhas. */
-    private static final Set<String> WOLVES = Set.of("poochyena", "mightyena", "lycanroc");
-    private static final Set<String> SHEEP = Set.of("wooloo", "dubwool", "mareep");
     private static final double SKELETON_RANGE = 12;
     private static final double SHEEP_RANGE = 10;
     /** Por checagem (a cada segundo). Lobos selvagens também não caçam ovelha o tempo todo. */
@@ -40,7 +33,7 @@ public class DogHunters {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         if (event.getLevel() instanceof ServerLevel && event.getEntity() instanceof PokemonEntity pokemon
-                && DOGS.contains(PokemonAi.species(pokemon))) {
+                && ConfigLists.species(Config.DOG_SPECIES).contains(PokemonAi.species(pokemon))) {
             dogs.add(pokemon);
         }
     }
@@ -52,7 +45,7 @@ public class DogHunters {
         for (PokemonEntity dog : dogs) {
             if (dog.isBusy() || Hunts.isHunting(dog)) continue;
             LivingEntity target = nearestSkeleton(dog);
-            if (target == null && PokemonAi.isWild(dog) && WOLVES.contains(PokemonAi.species(dog))
+            if (target == null && PokemonAi.isWild(dog) && ConfigLists.species(Config.WOLF_SPECIES).contains(PokemonAi.species(dog))
                     && dog.getRandom().nextFloat() < SHEEP_HUNT_CHANCE) {
                 target = nearestWildSheep(dog);
             }
@@ -75,7 +68,7 @@ public class DogHunters {
     private static LivingEntity nearestWildSheep(PokemonEntity dog) {
         return dog.level().getEntitiesOfClass(PokemonEntity.class, dog.getBoundingBox().inflate(SHEEP_RANGE),
                         sheep -> sheep.isAlive() && !sheep.isBusy() && PokemonAi.isWild(sheep) && !KeptPokemon.isKept(sheep)
-                                && SHEEP.contains(PokemonAi.species(sheep)) && dog.hasLineOfSight(sheep))
+                                && ConfigLists.species(Config.SHEEP_SPECIES).contains(PokemonAi.species(sheep)) && dog.hasLineOfSight(sheep))
                 .stream().min(Comparator.comparingDouble(dog::distanceToSqr)).orElse(null);
     }
 }

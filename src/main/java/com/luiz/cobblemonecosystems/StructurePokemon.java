@@ -1,5 +1,6 @@
 package com.luiz.cobblemonecosystems;
 
+import com.luiz.cobblemonecosystems.ConfigLists.Family;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,7 @@ import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Gender;
 
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -45,17 +47,6 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  */
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class StructurePokemon {
-    /** Uma linha evolutiva (a forma básica e a evoluída, ou null se não evolui) e o peso dela no sorteio. */
-    private record Family(String base, String evolved, int weight) {}
-
-    private static Family f(String base, String evolved) {
-        return new Family(base, evolved, 10);
-    }
-
-    private static Family f(String base, String evolved, int weight) {
-        return new Family(base, evolved, weight);
-    }
-
     /** Tipos de vila (pelo bioma onde ela nasce). DEFAULT vale para qualquer outro lugar (estruturas de mods...). */
     private static final String DEFAULT = "default";
     private static final List<String> VILLAGE_TYPES = List.of("plains", "desert", "savanna", "snowy", "taiga");
@@ -67,61 +58,14 @@ public class StructurePokemon {
         return TagKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("has_structure/village_" + type));
     }
 
-    /**
-     * Animal vanilla → tipo de vila → famílias que podem aparecer no lugar dele, com pesos (padrão 10).
-     * Cada vila sorteia uma família por animal: zebras na savana, renas na neve...
-     */
-    private static final Map<EntityType<?>, Map<String, List<Family>>> REPLACEMENTS = Map.of(
-            EntityType.HORSE, Map.of(
-                    "plains", List.of(f("mudbray", "mudsdale")),
-                    "desert", List.of(f("ponyta", "rapidash")),
-                    "savanna", List.of(f("blitzle", "zebstrika")),
-                    "snowy", List.of(f("stantler", "wyrdeer")),
-                    "taiga", List.of(f("deerling", "sawsbuck")),
-                    DEFAULT, List.of(f("ponyta", "rapidash"), f("mudbray", "mudsdale"))),
-            EntityType.COW, Map.of(
-                    "plains", List.of(f("miltank", null, 7), f("tauros", null, 3)),
-                    "desert", List.of(f("tauros", null)),
-                    "savanna", List.of(f("bouffalant", null, 6), f("tauros", null, 4)),
-                    "snowy", List.of(f("miltank", null)),
-                    "taiga", List.of(f("miltank", null, 6), f("bouffalant", null, 4)),
-                    DEFAULT, List.of(f("miltank", null, 7), f("tauros", null, 3))),
-            EntityType.PIG, Map.of(
-                    "plains", List.of(f("lechonk", "oinkologne")),
-                    "desert", List.of(f("spoink", "grumpig")),
-                    "savanna", List.of(f("tepig", "pignite")),
-                    "snowy", List.of(f("swinub", "piloswine")),
-                    "taiga", List.of(f("lechonk", "oinkologne", 6), f("swinub", "piloswine", 4)),
-                    DEFAULT, List.of(f("lechonk", "oinkologne"))),
-            EntityType.SHEEP, Map.of(
-                    "plains", List.of(f("wooloo", "dubwool", 6), f("mareep", "flaaffy", 4)),
-                    "desert", List.of(f("mareep", "flaaffy")),
-                    "savanna", List.of(f("mareep", "flaaffy")),
-                    "snowy", List.of(f("wooloo", "dubwool")),
-                    "taiga", List.of(f("wooloo", "dubwool", 6), f("skiddo", "gogoat", 4)),
-                    DEFAULT, List.of(f("wooloo", "dubwool", 6), f("mareep", "flaaffy", 4))),
-            // Aves que botam ovos no lugar das galinhas: Doduo e Psyduck comuns, Torchic e Piplup raros.
-            EntityType.CHICKEN, Map.of(
-                    "plains", List.of(f("doduo", "dodrio", 45), f("psyduck", "golduck", 45), f("torchic", "combusken", 10)),
-                    "desert", List.of(f("doduo", "dodrio", 90), f("torchic", "combusken", 10)),
-                    "savanna", List.of(f("doduo", "dodrio", 55), f("psyduck", "golduck", 40), f("torchic", "combusken", 5)),
-                    "snowy", List.of(f("psyduck", "golduck", 50), f("delibird", null, 45), f("piplup", "prinplup", 5)),
-                    "taiga", List.of(f("psyduck", "golduck", 55), f("doduo", "dodrio", 45)),
-                    DEFAULT, List.of(f("doduo", "dodrio", 45), f("psyduck", "golduck", 45), f("torchic", "combusken", 10))),
-            EntityType.CAT, Map.of(
-                    "desert", List.of(f("meowth", "persian", 7), f("espurr", "meowstic", 3)),
-                    "savanna", List.of(f("litleo", "pyroar", 6), f("shinx", "luxio", 4)),
-                    "snowy", List.of(f("glameow", "purugly", 6), f("sneasel", "weavile", 4)),
-                    "taiga", List.of(f("purrloin", "liepard", 4), f("glameow", "purugly", 3), f("skitty", "delcatty", 3)),
-                    DEFAULT, List.of(f("meowth", "persian", 4), f("skitty", "delcatty", 3), f("purrloin", "liepard", 2),
-                            f("espurr", "meowstic", 1))),
-            EntityType.CAMEL, Map.of(DEFAULT, List.of(f("numel", "camerupt"))),
-            EntityType.MOOSHROOM, Map.of(DEFAULT, List.of(f("miltank", null))),
-            EntityType.DONKEY, Map.of(DEFAULT, List.of(f("mudbray", "mudsdale"))),
-            EntityType.MULE, Map.of(DEFAULT, List.of(f("mudbray", "mudsdale")))
-    );
-    /** O gato da cabana da bruxa vira o Purrloin, o gato de rua sombrio, que combina com a bruxa. */
-    private static final Family WITCH_CAT = f("purrloin", "liepard");
+    /** Animal vanilla → a lista da configuração com as famílias de cada tipo de vila ([village_pens]). */
+    private static final Map<EntityType<?>, ModConfigSpec.ConfigValue<List<? extends String>>> PENS = Map.of(
+            EntityType.HORSE, Config.PEN_HORSE, EntityType.DONKEY, Config.PEN_DONKEY, EntityType.MULE, Config.PEN_MULE,
+            EntityType.CAMEL, Config.PEN_CAMEL, EntityType.COW, Config.PEN_COW, EntityType.MOOSHROOM, Config.PEN_MOOSHROOM,
+            EntityType.PIG, Config.PEN_PIG, EntityType.SHEEP, Config.PEN_SHEEP, EntityType.CHICKEN, Config.PEN_CHICKEN,
+            EntityType.CAT, Config.PEN_CAT);
+    /** O gato da cabana da bruxa vira o Purrloin, o gato de rua sombrio (a textura de gato preto é só dele). */
+    private static final Family WITCH_CAT = new Family("purrloin", "liepard", 10);
 
     private static final int BASE_MIN_LEVEL = 5, BASE_MAX_LEVEL = 15;
     private static final int EVOLVED_MIN_LEVEL = 25, EVOLVED_MAX_LEVEL = 35;
@@ -159,7 +103,7 @@ public class StructurePokemon {
     @SubscribeEvent
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
         Entity entity = event.getEntity();
-        if (!Config.STRUCTURE_POKEMON.get() || !REPLACEMENTS.containsKey(entity.getType())) return;
+        if (!Config.STRUCTURE_POKEMON.get() || !PENS.containsKey(entity.getType())) return;
 
         MobSpawnType reason = event.getSpawnType();
         // Gatos não têm spawn de bioma: NATURAL para gato é sempre o CatSpawner das vilas (e da cabana da bruxa).
@@ -210,23 +154,9 @@ public class StructurePokemon {
     public static void onEntityJoin(EntityJoinLevelEvent event) {
         if (event.getLevel() instanceof ServerLevel && event.getEntity() instanceof PokemonEntity pokemon
                 && ("minecraft:chicken".equals(pokemon.getPersistentData().getString(SOURCE_KEY))
-                    || EGG_LAYERS.contains(PokemonAi.species(pokemon)))) {
+                    || ConfigLists.species(Config.EGG_LAYING_SPECIES).contains(PokemonAi.species(pokemon)))) {
             egglayers.add(pokemon);
         }
-    }
-
-    /** As espécies que substituem as galinhas (e as evoluções): as fêmeas delas botam ovos no pasto também. */
-    private static final Set<String> EGG_LAYERS = eggLayers();
-
-    private static Set<String> eggLayers() {
-        Set<String> species = new HashSet<>();
-        for (List<Family> families : REPLACEMENTS.get(EntityType.CHICKEN).values()) {
-            for (Family family : families) {
-                species.add(family.base());
-                if (family.evolved() != null) species.add(family.evolved());
-            }
-        }
-        return species;
     }
 
     @SubscribeEvent
@@ -239,6 +169,7 @@ public class StructurePokemon {
     private static void spawn(Pending p) {
         RandomSource random = p.level().random;
         Family family = p.witchCat() ? WITCH_CAT : familyOfVillage(p);
+        if (family == null) return; // lista vazia na configuração: o animal só some
 
         boolean evolved = family.evolved() != null && (p.forceEvolved() || random.nextFloat() < Config.STRUCTURE_EVOLVED_CHANCE.get());
         String species = evolved ? family.evolved() : family.base();
@@ -265,16 +196,10 @@ public class StructurePokemon {
      * o mesmo resultado dentro da vila, mesmo para cercados em chunks que carregam em momentos diferentes.
      */
     private static Family familyOfVillage(Pending p) {
-        Map<String, List<Family>> byVillage = REPLACEMENTS.get(p.type());
-        List<Family> options = byVillage.getOrDefault(p.village(), byVillage.get(DEFAULT));
+        Map<String, List<Family>> byVillage = ConfigLists.keyed(PENS.get(p.type()));
+        List<Family> options = byVillage.getOrDefault(p.village(), byVillage.getOrDefault(DEFAULT, List.of()));
         long seed = p.level().getSeed() ^ (p.villageId() * 341873128712L) ^ BuiltInRegistries.ENTITY_TYPE.getKey(p.type()).hashCode();
-        int total = options.stream().mapToInt(Family::weight).sum();
-        int roll = RandomSource.create(seed).nextInt(total);
-        for (Family family : options) {
-            roll -= family.weight();
-            if (roll < 0) return family;
-        }
-        return options.get(0);
+        return ConfigLists.pick(options, RandomSource.create(seed));
     }
 
     /**
@@ -287,7 +212,8 @@ public class StructurePokemon {
         for (PokemonEntity pokemon : egglayers) {
             boolean fromChicken = "minecraft:chicken".equals(pokemon.getPersistentData().getString(SOURCE_KEY));
             boolean inPen = fromChicken && PokemonAi.isWild(pokemon);
-            boolean inPasture = pokemon.getTethering() != null && EGG_LAYERS.contains(PokemonAi.species(pokemon));
+            boolean inPasture = pokemon.getTethering() != null
+                    && ConfigLists.species(Config.EGG_LAYING_SPECIES).contains(PokemonAi.species(pokemon));
             if (pokemon.isBusy() || (!inPen && !inPasture) || pokemon.getPokemon().getGender() != Gender.FEMALE) continue;
             var data = pokemon.getPersistentData();
             long now = pokemon.level().getGameTime();

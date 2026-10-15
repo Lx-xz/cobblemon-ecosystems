@@ -1,5 +1,6 @@
 package com.luiz.cobblemonecosystems;
 
+import com.luiz.cobblemonecosystems.ConfigLists.Family;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,10 +35,6 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  */
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public class SpawnerNests {
-    private record Family(String base, String evolved, int weight) {}
-    private static final List<Family> SPIDERS = List.of(
-            new Family("spinarak", "ariados", 40), new Family("joltik", "galvantula", 30), new Family("tarountula", "spidops", 30));
-    private static final Family DWEBBLE = new Family("dwebble", "crustle", 1);
     private static final float EVOLVED_CHANCE = 0.25f;
     private static final int MIN_NEST = 3, MAX_NEST = 5;
     /** Os do ninho não se afastam mais que isso dele. */
@@ -94,23 +91,23 @@ public class SpawnerNests {
     /** As famílias do ninho para esse spawner, ou null se ele continua como está. */
     private static List<Family> nestFamily(EntityType<?> type) {
         if (type == EntityType.SPIDER || type == EntityType.CAVE_SPIDER) {
-            return Config.SPIDER_SPAWNER_NESTS.get() && Removal.shouldRemove(type) ? SPIDERS : null;
+            return Config.SPIDER_SPAWNER_NESTS.get() && Removal.shouldRemove(type) ? ConfigLists.families(Config.SPIDER_NEST_POKEMON) : null;
         }
-        if (type == EntityType.SILVERFISH) return Config.SILVERFISH_DWEBBLE.get() ? List.of(DWEBBLE) : null;
+        if (type == EntityType.SILVERFISH) return Config.SILVERFISH_DWEBBLE.get() ? ConfigLists.families(Config.INFESTED_POKEMON) : null;
         return null;
     }
 
     private static void replace(ServerLevel level, BlockPos pos) {
         if (!(level.getBlockEntity(pos) instanceof SpawnerBlockEntity spawner)) return;
         List<Family> families = nestFamily(spawnedType(spawner));
-        if (families == null) return;
+        if (families == null || families.isEmpty()) return;
         level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
 
         RandomSource random = level.random;
-        Family family = pick(families, random);
+        Family family = ConfigLists.pick(families, random);
         int count = MIN_NEST + random.nextInt(MAX_NEST - MIN_NEST + 1);
         for (int i = 0; i < count; i++) {
-            boolean evolved = random.nextFloat() < EVOLVED_CHANCE;
+            boolean evolved = family.evolved() != null && random.nextFloat() < EVOLVED_CHANCE;
             int pokemonLevel = evolved ? 25 + random.nextInt(8) : 10 + random.nextInt(11);
             PokemonEntity pokemon = PokemonProperties.Companion.parse((evolved ? family.evolved() : family.base()) + " level=" + pokemonLevel)
                     .createEntity(level);
@@ -122,12 +119,4 @@ public class SpawnerNests {
         }
     }
 
-    private static Family pick(List<Family> families, RandomSource random) {
-        int roll = random.nextInt(families.stream().mapToInt(Family::weight).sum());
-        for (Family family : families) {
-            roll -= family.weight();
-            if (roll < 0) return family;
-        }
-        return families.get(0);
-    }
 }

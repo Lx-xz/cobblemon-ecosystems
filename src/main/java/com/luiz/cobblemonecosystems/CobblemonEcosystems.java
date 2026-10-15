@@ -49,6 +49,7 @@ public class CobblemonEcosystems {
         TraderBattle.registerCobblemonEvents();
         VillagerBattles.registerCobblemonEvents();
         HutWitch.registerCobblemonEvents();
+        HabitatScan.registerCobblemonEvents();
     }
 
     @SubscribeEvent

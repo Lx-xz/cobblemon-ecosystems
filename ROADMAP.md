@@ -28,23 +28,39 @@ Legenda: `[ ]` a fazer · **(decidir)** precisa de decisão antes · ⭐ priorid
 | Cavalo esqueleto / zumbi, Zoglin | **Ficam** | Mortos-vivos |
 | Slime / Magma Cube | **Opção** (`remove_slimes`, desligada) | Grimer, Goomy e Solosis dão slimeball; Slugma, Magcargo, Numel e Camerupt dão creme de magma |
 
+### O que o Cobblemon 1.8.2 já faz (não repetir)
+- **Sono por espécie** (`behaviour.resting`): hora de dormir, luz e blocos. Os noturnos (Oddish, Hoothoot) dormem
+  de dia; o **Oddish dorme enterrado** quando está em terra ou grama. O habitat usa esses horários para chamar os
+  Pokémon de volta para casa.
+- **Bandos** (`behaviour.herd`): Pokémon da mesma linha andam juntos, seguindo um líder.
+- **Interações com item na mão** (`pokemon_interactions`), com tempo de espera:
+  - **Escova** (136 espécies): penas, lã, Shed Shell, açúcar...
+  - **Farinha de osso** (20): mudas, cacto, alga, frutas vermelhas...
+  - **Balde**: leite (Miltank, Bouffalant, Gogoat), lava (Numel, Camerupt, Magcargo), neve fofa (Rotom)
+  - **Garrafa**: Moomoo Milk (Miltank) e mel (Vespiquen); **tesoura** no Furfrou
+  - As nossas farms são passivas (no pasto, ligadas ao habitat) e não devem repetir esses itens.
+- **Habitat pools**: estruturas naturais onde Pokémon nascem (montes de insetos, colmeias de terra, círculos de fada...).
+- Não achei Kakuna pendurado na 1.8.2 (o Kakuna só tem as poses em pé e dormindo). O Zubat tem uma animação de
+  "roost" (de cabeça para baixo) que o Cobblemon ainda não usa.
+
 ---
 
 ## 1. A testar no jogo
 
 Feito, mas ainda sem teste no jogo.
 
-- [ ] Servidor dedicado (até agora só singleplayer)
+- [ ] Habitats: conforto por tipo, botão de casinha no menu radial, temperamentos, volta na hora de dormir da espécie
+- [x] Servidor dedicado (até agora só singleplayer)
 - [ ] Mercador não vende mais balde de peixe, girino e axolote
-- [ ] Dwebble nos blocos infestados: sai bravo ao quebrar, chama os outros quando apanha
-- [ ] Ninhos no lugar dos spawners de aranha (Spinarak, Joltik, Tarountula) e de traça na fortaleza (Dwebble)
-- [ ] Bug das abelhas do vanilla tentando sair sem parar (som infinito)
-- [ ] Abelhas no pasto: colmeia craftada, pólen, mel, escondidas dentro da colmeia
+- [x] Dwebble nos blocos infestados: sai bravo ao quebrar, chama os outros quando apanha
+- [x] Ninhos no lugar dos spawners de aranha (Spinarak, Joltik, Tarountula) e de traça na fortaleza (Dwebble)
+- [x] Bug das abelhas do vanilla tentando sair sem parar (som infinito)
+- [x] Abelhas no pasto: colmeia craftada, pólen, mel, escondidas dentro da colmeia
 - [ ] Só as fêmeas botam ovos, nos currais e no pasto
-- [ ] Pokémon do pasto voltam andando em vez de ir para o PC
-- [ ] Bruxa da cabana: neutra, Purrloin de estimação, batalha para ganhar o Purrloin
-- [ ] Pokémon preso na jaula dos postos de saqueadores
-- [ ] Pokémon pequenos em cima da cabeça do aldeão (posição e IA do aldeão)
+- [x] Pokémon do pasto voltam andando em vez de ir para o PC
+- [x] Bruxa da cabana: neutra, Purrloin de estimação, batalha para ganhar o Purrloin
+- [x] Pokémon preso na jaula dos postos de saqueadores
+- [x] Pokémon pequenos em cima da cabeça do aldeão (posição e IA do aldeão)
 
 Comandos de teste:
 ```
@@ -186,8 +202,7 @@ faz Pokémon caçarem com os próprios golpes (`Hunts`), então dá para reaprov
 
 ## 8. Rotina e ambiente
 
-- [ ] **Dia e noite**: noturnos (Hoothoot, Zubat, Gastly, Murkrow) dormem de dia e saem à noite
-- [ ] Zubat e Woobat dormem de cabeça para baixo no teto das cavernas
+- [ ] Zubat e Woobat dormem de cabeça para baixo no teto (usar a animação "roost" que o Cobblemon já tem)
 - [ ] **Chuva**: tipo Fogo procuram abrigo; tipo Água e Lotad ficam felizes
 - [ ] **Tempestade**: tipo Elétrico atraídos por para-raios e agitados com raios
 - [ ] Pokémon vão beber água de vez em quando
