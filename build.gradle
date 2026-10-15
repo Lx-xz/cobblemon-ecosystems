@@ -48,12 +48,16 @@ dependencies {
     // Kotlin for Forge: o Cobblemon precisa dele para carregar no runClient/runServer.
     runtimeOnly 'thedarkcolour:kotlinforforge-neoforge:5.12.0'
 
-    // Performance no runClient (não vão dentro do jar do mod). Ids exatos das versões no Modrinth:
-    runtimeOnly 'maven.modrinth:sodium:uMOpc5uV'        // mc1.21.1-0.8.13-neoforge: renderização
-    runtimeOnly 'maven.modrinth:lithium:DDUrRVCA'       // mc1.21.1-0.15.4-neoforge: lógica do servidor
-    runtimeOnly 'maven.modrinth:ferrite-core:x7kQWVju'  // 7.0.3-neoforge: memória
-    runtimeOnly 'maven.modrinth:modernfix:5HLHxQ2F'     // 5.27.24+mc1.21.1: carregamento e memória
-    runtimeOnly 'maven.modrinth:entityculling:8w8FfUPs' // 1.11.2: não desenha entidades escondidas
+    // Performance no runClient (não vão dentro do jar do mod). Ids exatos das versões no Modrinth.
+    // Vêm do Modrinth, que algumas redes bloqueiam: nesse caso rode com -Pperf_mods=false
+    // (ou mude perf_mods no gradle.properties) para o runClient subir sem eles.
+    if (project.perf_mods.toBoolean()) {
+        runtimeOnly 'maven.modrinth:sodium:uMOpc5uV'        // mc1.21.1-0.8.13-neoforge: renderização
+        runtimeOnly 'maven.modrinth:lithium:DDUrRVCA'       // mc1.21.1-0.15.4-neoforge: lógica do servidor
+        runtimeOnly 'maven.modrinth:ferrite-core:x7kQWVju'  // 7.0.3-neoforge: memória
+        runtimeOnly 'maven.modrinth:modernfix:5HLHxQ2F'     // 5.27.24+mc1.21.1: carregamento e memória
+        runtimeOnly 'maven.modrinth:entityculling:8w8FfUPs' // 1.11.2: não desenha entidades escondidas
+    }
 }
 
 processResources {

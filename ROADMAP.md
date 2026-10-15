@@ -26,7 +26,7 @@ Legenda: `[ ]` a fazer · **(decidir)** precisa de decisão antes · ⭐ priorid
 | Devastador (ravager) | **Fica, por enquanto** | Só sai se um Pokémon casar com os saqueadores (seção 7) |
 | Phantom | **Fica** | Morto-vivo fantasioso |
 | Cavalo esqueleto / zumbi, Zoglin | **Ficam** | Mortos-vivos |
-| Slime / Magma Cube | **Opção** (`remove_slimes`, desligada) | Grimer, Goomy e Solosis dão slimeball; Slugma, Magcargo, Numel e Camerupt dão creme de magma |
+| Slime / Magma Cube | **Sai** (`remove_slimes`, ligada por padrão) | Grimer, Goomy e Solosis dão slimeball; Slugma, Magcargo, Numel e Camerupt dão creme de magma |
 
 ### O que o Cobblemon 1.8.2 já faz (não repetir)
 - **Sono por espécie** (`behaviour.resting`): hora de dormir, luz e blocos. Os noturnos (Oddish, Hoothoot) dormem
@@ -49,18 +49,7 @@ Legenda: `[ ]` a fazer · **(decidir)** precisa de decisão antes · ⭐ priorid
 
 Feito, mas ainda sem teste no jogo.
 
-- [ ] Habitats: conforto por tipo, botão de casinha no menu radial, temperamentos, volta na hora de dormir da espécie
-- [x] Servidor dedicado (até agora só singleplayer)
-- [ ] Mercador não vende mais balde de peixe, girino e axolote
-- [x] Dwebble nos blocos infestados: sai bravo ao quebrar, chama os outros quando apanha
-- [x] Ninhos no lugar dos spawners de aranha (Spinarak, Joltik, Tarountula) e de traça na fortaleza (Dwebble)
-- [x] Bug das abelhas do vanilla tentando sair sem parar (som infinito)
-- [x] Abelhas no pasto: colmeia craftada, pólen, mel, escondidas dentro da colmeia
-- [ ] Só as fêmeas botam ovos, nos currais e no pasto
-- [x] Pokémon do pasto voltam andando em vez de ir para o PC
-- [x] Bruxa da cabana: neutra, Purrloin de estimação, batalha para ganhar o Purrloin
-- [x] Pokémon preso na jaula dos postos de saqueadores
-- [x] Pokémon pequenos em cima da cabeça do aldeão (posição e IA do aldeão)
+Nada pendente: tudo o que estava aqui já foi testado.
 
 Comandos de teste:
 ```
@@ -151,7 +140,6 @@ Produção lenta, com tempo de espera. Talvez exija o Pokémon feliz ou alimenta
 - [ ] **Tropius**: fruta no pescoço para colher
 - [ ] **Gastly e Haunter**: membrana de phantom de vez em quando à noite
 - [ ] **Sableye e Carbink**: minérios pequenos (cuidado com balanceamento)
-- [ ] **Exeggcute**: ovos
 
 ---
 

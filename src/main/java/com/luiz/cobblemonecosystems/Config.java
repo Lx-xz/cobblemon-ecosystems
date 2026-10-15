@@ -89,7 +89,7 @@ public final class Config {
                 "Slimes and magma cubes. Grimer, Goomy and Solosis drop slime balls; Slugma, Magcargo, Numel and",
                 "Camerupt drop magma cream. Tag: cobblemon_ecosystems:removed_slimes.",
                 "Slimes e magma cubes. Pokémon já dão slimeball e creme de magma.")
-                .define("remove_slimes", false);
+                .define("remove_slimes", true);
         REMOVE_FROM_EXISTING_WORLDS = BUILDER.comment(
                 "Also remove matching mobs already saved in the world when their chunk loads (tamed pets included).",
                 "Também remove os mobs que já estavam salvos no mundo quando o chunk carrega (inclusive pets domados).")

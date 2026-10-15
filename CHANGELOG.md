@@ -31,6 +31,7 @@
 - Only **female** birds lay eggs
 - Only **wolf** Pokémon (Poochyena, Mightyena, Lycanroc) hunt wild sheep Pokémon; other dogs only hunt skeletons
 - The wandering trader no longer sells pufferfish and tropical fish buckets while those fish are removed
+- Slimes and magma cubes are now removed by default (`remove_slimes` is on); existing config files keep their current value
 
 </details>
 
@@ -63,6 +64,7 @@
 - Só as **fêmeas** das aves botam ovos
 - Só os Pokémon **lobo** (Poochyena, Mightyena, Lycanroc) caçam Pokémon ovelha selvagens; os outros cachorros só caçam esqueletos
 - O mercador ambulante não vende mais balde de baiacu nem de peixe tropical enquanto esses peixes estiverem removidos
+- Slimes e cubos de magma agora saem por padrão (`remove_slimes` ligado); arquivos de configuração que já existem mantêm o valor atual
 
 </details>
 
