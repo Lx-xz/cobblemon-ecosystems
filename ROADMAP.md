@@ -3,239 +3,156 @@
 Ideia central: os Pokémon substituem os animais do Minecraft. O mundo não pode perder nenhuma mecânica do
 vanilla por causa disso, e os Pokémon devem parecer criaturas vivas, não só "mobs de batalha".
 
-Legenda: `[x]` feito · `[ ]` a fazer · **(decidir)** precisa de decisão antes
+Este arquivo guarda só o que **falta fazer**, o que **falta testar** e as **decisões** que guiam o mod.
+O que já foi feito está no [README.md](README.md) e no [CHANGELOG.md](CHANGELOG.md).
+
+Legenda: `[ ]` a fazer · **(decidir)** precisa de decisão antes · ⭐ prioridade
 
 ---
 
-## 0. Já feito
+## Regras do projeto
 
-- [x] Remover animais vanilla do spawn natural de todos os biomas (biome modifier + tag editável)
-- [x] Bloquear animais de outras fontes (ovos, reprodução, gatos de vila, mundos antigos, `/summon`)
-- [x] Baldes de peixe, girino e axolote desativados: o mercador ambulante não vende balde de bicho removido (sem
-      aquário no jogo, não vale um "balde com Pokémon") — *a testar no jogo*
-- [x] Hoglin removido (javali)
-- [x] Aranhas e aranhas de caverna removidas (olho de aranha e linha continuam vindo de Spinarak, Ariados, Joltik, Galvantula, Tarountula, Spidops)
-- [x] Mercador ambulante chega com 2 Mudbray na guia, no lugar das lhamas
-- [x] Manta do mercador no Mudbray e no Mudsdale (camada de textura por aspect)
-- [x] Nome "Mudbray do Mercador"
-- [x] Batalha contra o mercador (agachar + clique, ou lançar Pokémon nele ou nos Mudbray)
-- [x] Mercador parado e Mudbray escondidos durante a batalha
-- [x] Vencer o mercador libera a captura de um Mudbray (skin de manta mantida após captura e evolução)
-- [x] Mercador shiny (1 em 512): roupa e mantas roxas com detalhes pretos, Mudbray shiny
-- [x] Animais de estruturas (currais, estábulos, camelos do deserto, gatos de vila e da bruxa) viram Pokémon
-- [x] Mesmo cercado = mesma espécie; 20% de chance de vir evoluído
-- [x] **Pokémon dos cercados por tipo de vila** (bioma): cavalos viram Mudbray na planície, Ponyta no deserto,
-      Blitzle na savana, Stantler na neve e Deerling na taiga; o mesmo para vacas, porcos, ovelhas, galinhas e gatos
-- [x] **Uma espécie por vila** (não por cercado): uma vila tem Miltank, outra Tauros; espécies raras com peso menor
-- [x] Galinhas viram aves que **botam ovos** (Doduo e Psyduck comuns; Torchic raro, muito raro na savana; Piplup muito
-      raro na neve); um ovo a cada 5 a 10 minutos, como a galinha
-- [ ] **Aldeões pastoreando os Pokémon**, não só trocar animal por Pokémon: pastor escova e tosquia Wooloo e Mareep,
-      fazendeiro ordenha Miltank e recolhe os ovos, Pokémon dos cercados comem feno e seguem o aldeão no horário de trabalho
-- [ ] Pokémon dos cercados da vila **incapturáveis**, com uma missão para ganhar um (ex.: vencer o Combusken do
-      fazendeiro para levar um Torchic), em vez de vários de graça
-- [x] Variantes shiny próprias para as formas Candyan (gomas em tons vizinhos: ciano, magenta, menta, pêssego, limão, lilás; Orthworm de bala de hortelã listrada)
-- [x] **Golett e Golurk no lugar do golem de ferro** (nascem com a vila e quando os aldeões chamam um golem; atacam mobs hostis menos creepers; não se afastam de casa; incapturáveis)
-- [x] Golem de ferro não pode mais ser montado com abóbora (o de neve continua)
-- [x] **Aldeões com Pokémon** (20% dos aldeões nascidos com a vila; por profissão; Honedge mais raro; pequenos ficam na cabeça)
-- [x] **Pokémon abelha nas colmeias** (Combee, Cutiefly, Ribombee e a rainha Vespiquen; visitam flores, polinizam e enchem a colmeia de mel)
-- [x] **Cachorros caçam esqueletos** (do jogador e selvagens); selvagens às vezes caçam Wooloo, Dubwool e Mareep selvagens
-- [x] Corrigido: cachorros e Golurk ficavam parados (trocar os comportamentos do cérebro do Cobblemon apagava andar,
-      olhar etc.). Agora a caçada é feita pelo próprio mod (`Hunts`): anda até o alvo e golpeia
-- [x] Golett e Golurk atacam mobs hostis como o golem de ferro (menos creepers), com golpe que joga para cima
-- [x] **Ícone de casinha** antes do nome dos Pokémon da vila incapturáveis (Golett, Golurk e Pokémon dos aldeões)
-- [x] Pokémon na cabeça do aldeão não sufocam quando ele passa por lugares baixos
-- [x] Combee que travava em cima da árvore: agora vai até a frente da colmeia e, se não achar caminho em 30 s, entra mesmo assim
-- [x] Gatos espantam creepers e phantoms, e esqueletos fogem de cachorros: **o Cobblemon já faz isso** (campo `entityInteract` das espécies)
-
----
-
-## 1. Base do mod
-
-- [x] Renomear para **Cobblemon Ecosystems** (mod id `cobblemon_ecosystems`, pacote `com.luiz.cobblemonecosystems`)
-- [x] Arquivo de configuração simples para o jogador escolher (ver seção 1.1)
-
-### 1.1 Configuração (`config/cobblemon_ecosystems-common.toml`)
-
-Rascunho das opções. Cada grupo é uma tag editável, então dá para ajustar mob por mob com datapack.
-
-```toml
-[remocao]
-animais_passivos = true    # vacas, porcos, ovelhas, peixes, gatos, cavalos...
-animais_hostis   = true    # aranhas, hoglin, traça, endermite, guardiões...
-slimes           = false   # slime e magma cube juntos (são parecidos)
-remover_dos_mundos_antigos = true   # apagar os que já existem ao carregar o chunk
-
-[mercador]
-pokemon_de_carga = true
-batalha          = true
-
-[estruturas]
-trocar_animais_por_pokemon = true
-chance_evoluido = 0.2
-
-[comportamentos]
-# um liga/desliga por mecânica: abelhas, gatos, sapos, pasto...
-```
-
-- [x] Grupos de remoção: passivos, hostis e slimes (slime + magma cube), cada um com sua tag
-- [x] Liga/desliga para cada módulo (estruturas, guardiões, aldeões, mercador, batalha, colmeias, cachorros) e as chances
-- [x] Recarregar sem reiniciar: vale na hora, menos os spawns naturais nos biomas (ao reabrir o mundo)
-- [x] Explicar cada opção em comentários no próprio arquivo (inglês e português)
-- [x] Traduções (pt_br e en_us) em vez de textos fixos no código (falas e nomes do mercador)
-- [x] Tela de configuração dentro do jogo (Mods → Cobblemon Ecosystems → Config), com nomes traduzidos
-- [x] Testado no jogo: tirar os slimes pela configuração funciona
-- [ ] Testar em servidor dedicado (não só no singleplayer)
-- [x] Página do mod no Modrinth (descrição, changelog, imagens, dependências) — versão 1.0.0
-
----
-
-## 2. Remoção de mobs
-
-**Regra:** só sai o mob que tem uma contraparte Pokémon clara. Mobs fantasiosos, ou que sustentam alguma
-mecânica sem substituto, ficam.
+- **Remoção de mobs**: só sai o mob que tem uma contraparte Pokémon clara. Mobs fantasiosos, ou que sustentam
+  alguma mecânica sem substituto, ficam.
+- **Nenhuma mecânica perdida**: o que o animal fazia (ovos, mel, lã, leite...) tem que voltar por algum Pokémon.
+- **Sem farm infinita**: produção lenta, com tempo de espera; spawners viram ninhos com número fixo de Pokémon.
+- **Pokémon de habitantes** (aldeões, mercador, bruxa) são incapturáveis; ganhar um é por batalha ou missão.
+- Cada recurso tem um liga/desliga na configuração.
 
 | Mob | Decisão | Motivo |
 |---|---|---|
 | Guardião / Guardião Ancião | **Fica** | Peixe fantasioso, e a única fonte de prismarinho e esponja |
 | Endermite | **Fica** | Sem contraparte Pokémon, e as farms de enderman dependem dele |
-| Devastador (ravager) | **Fica, por enquanto** | Só sai se um Pokémon casar com os saqueadores (ver seção 8.1) |
+| Devastador (ravager) | **Fica, por enquanto** | Só sai se um Pokémon casar com os saqueadores (seção 7) |
 | Phantom | **Fica** | Morto-vivo fantasioso |
 | Cavalo esqueleto / zumbi, Zoglin | **Ficam** | Mortos-vivos |
-| Slime / Magma Cube | **Opção na configuração** (`slimes`, desligada por padrão) | Monstros; Grimer, Goomy e Solosis dão slimeball; Slugma, Magcargo, Numel, Camerupt e Heatran dão creme de magma |
-| Traça (silverfish) | **Vira Dwebble** (opção `silverfish_dwebble`) | Inseto que mora dentro de uma pedra, combina com bloco infestado |
+| Slime / Magma Cube | **Opção** (`remove_slimes`, desligada) | Grimer, Goomy e Solosis dão slimeball; Slugma, Magcargo, Numel e Camerupt dão creme de magma |
 
-- [x] Opção `remove_slimes` na configuração (slime e magma cube juntos, desligada por padrão)
-- [x] Traça → **Dwebble** nos blocos infestados (Nincada é raro demais para a quantidade de traças) — *a testar no jogo*
-  - Quebrar um bloco infestado faz sair um Dwebble selvagem e bravo, que ataca o jogador mais perto por 30 s
-  - Machucado por um jogador, chama os outros: blocos infestados por perto se abrem e soltam mais Dwebble
-    (com `mobGriefing` desligado, o bloco fica inteiro e o Dwebble aparece ao lado)
-- [x] **Spawners viram ninhos** (opção `spider_spawner_nests`) — *a testar no jogo*: quando o chunk carrega, o spawner de
-      aranha (minas, masmorras) some e deixa 3 a 5 Pokémon aranha de uma espécie (Spinarak, Joltik ou Tarountula, às
-      vezes evoluídos), que ficam por perto e não somem. Sem farm infinita. O spawner de traça da fortaleza vira ninho de Dwebble
-- [ ] Jóquei de aranha: o esqueleto deveria montar num Ariados?
+---
+
+## 1. A testar no jogo
+
+Feito, mas ainda sem teste no jogo.
+
+- [ ] Servidor dedicado (até agora só singleplayer)
+- [ ] Mercador não vende mais balde de peixe, girino e axolote
+- [ ] Dwebble nos blocos infestados: sai bravo ao quebrar, chama os outros quando apanha
+- [ ] Ninhos no lugar dos spawners de aranha (Spinarak, Joltik, Tarountula) e de traça na fortaleza (Dwebble)
+- [ ] Bug das abelhas do vanilla tentando sair sem parar (som infinito)
+- [ ] Abelhas no pasto: colmeia craftada, pólen, mel, escondidas dentro da colmeia
+- [ ] Só as fêmeas botam ovos, nos currais e no pasto
+- [ ] Pokémon do pasto voltam andando em vez de ir para o PC
+- [ ] Bruxa da cabana: neutra, Purrloin de estimação, batalha para ganhar o Purrloin
+- [ ] Pokémon preso na jaula dos postos de saqueadores
+- [ ] Pokémon pequenos em cima da cabeça do aldeão (posição e IA do aldeão)
+
+Comandos de teste:
+```
+/summon minecraft:villager ~ ~ ~ {NeoForgeData:{"cobblemon_ecosystems:adopt":1b,"cobblemon_ecosystems:adopt_species":"pichu"}}
+/summon iron_golem ~ ~ ~ {NeoForgeData:{"cobblemon_ecosystems:guardian_replace":"STRUCTURE","cobblemon_ecosystems:guardian_species":"golurk"}}
+/summon witch ~ ~ ~ {NeoForgeData:{"cobblemon_ecosystems:hut_witch":1b}}
+/summon cat ~ ~ ~ {NeoForgeData:{"cobblemon_ecosystems:replace":1b,"cobblemon_ecosystems:witch_cat":1b,"cobblemon_ecosystems:replace_shiny":1b}}
+/summon wandering_trader ~ ~ ~ {UUID:[I;1,2,1,514]}
+```
+O `replace_shiny` e o `replace_evolved` valem para qualquer animal de estrutura (cavalo, vaca, galinha...).
+O UUID do mercador cai no shiny.
+
+---
+
+## 2. Vilas
+
+### Currais ⭐
+- [ ] **Aldeões pastoreando os Pokémon**: pastor escova e tosquia Wooloo e Mareep, fazendeiro ordenha Miltank e
+      recolhe os ovos, Pokémon dos cercados comem feno e seguem o aldeão no horário de trabalho
+- [ ] Pokémon dos cercados **incapturáveis**, com uma **missão** para ganhar um (ex.: vencer o Combusken do fazendeiro
+      para levar um Torchic), em vez de vários de graça
+- [ ] Pokémon da vila ficam calmos perto de aldeões e fogem de zumbis
+
+### Aldeões com Pokémon
+- [ ] **Nomes de aldeões**: cada aldeão com pet ganha um nome ("Ash, o Ferreiro") e o pet leva o nome dele
+      ("Aron do Ash"), para saber qual Pokémon é de qual aldeão
+- [ ] Pokémon do aldeão ajudam na profissão (Timburr carrega blocos, Bulbasaur acelera plantações)
+- [ ] Máquina de cura: tocar a animação e o som de cura de verdade quando o aldeão cura o pet
+- [ ] Aldeões de reprodução também adotarem (hoje só os nascidos com a vila)
+
+### Guardiões
+- [ ] Golett e Golurk desafiáveis como "guardião da vila"
+- [ ] Craft do Golett (ex.: abóbora sobre blocos de argila ou terra, como o golem de barro da lenda)
+- [ ] Golurk "cansado" volta para o centro da vila (sino) em vez do ponto onde nasceu
+- [ ] Growlithe ajudando os guardiões (como os cães policiais do anime)
 
 ---
 
 ## 3. Devolver mecânicas que os animais faziam
 
-### Abelhas e colmeias ⭐
-- [x] Pokémon abelha moram nas colmeias e ninhos naturais (cada abelha guardada vira um morador, até 3)
-- [x] **Uma colônia por colmeia**, como os cercados: Combee (com no máximo uma rainha Vespiquen) ou Cutiefly (com Ribombee)
-- [x] Visitam flores, polinizam uma plantação perto e enchem a colmeia de mel
-- [x] Com a rainha Vespiquen, a colmeia às vezes enche dois níveis de uma vez
-- [x] **Entram na colmeia** à noite, na chuva e para descansar depois de levar mel (por isso não dormem do lado de fora)
-- [x] **Quebrar ou explodir a colmeia solta** quem estiver dentro
-- [x] **Ganhar e perder a colmeia**: Pokémon abelha selvagens sem casa adotam uma colmeia da mesma colônia com vaga
-      (até 16 blocos); perdem a casa se ela for quebrada; morador sumido (capturado, derrotado) libera a vaga
-- [ ] Bug corrigido a testar: abelhas do vanilla tentando sair sem parar (som infinito)
-- [ ] Mexer na colmeia sem fogueira embaixo deixa os moradores bravos (com o revide da seção 6)
-- [x] **No pasto**: Pokémon abelha do jogador adotam uma colmeia craftada na área do pasto, visitam as flores de lá, fazem
-      mel e entram nela à noite, na chuva e depois de levar mel. Ficam escondidos dentro da colmeia (invisíveis e parados)
-      em vez de sair do mundo, porque o Cobblemon tiraria o Pokémon do pasto — *a testar no jogo*
-  - [x] Textura de pólen (a do Cobblemon) depois de visitar uma flor
+### Abelhas
+- [ ] Mexer na colmeia sem fogueira embaixo deixa os moradores bravos (depende do revide, seção 6)
 - [ ] Toque Suave: levar a colmeia com os Pokémon dentro (hoje quebrar sempre solta todos)
-- [ ] **(decidir)** Beedrill fora das colmeias (minha sugestão): é vespa, não faz mel
-  - Kakuna penduradas nas árvores de florestas, e Beedrill defendendo a área (seção 6, território)
-  - Ideia: Beedrill como predador que de vez em quando ataca colmeias de Combee, e a Vespiquen defende
-
-### Gatos
-- [x] Creepers fogem de 29 Pokémon gato (Meowth, Persian, Skitty, Litten, Shinx...) — **já existe no Cobblemon**
-- [x] Phantoms evitam 33 Pokémon gato — **já existe no Cobblemon**
-- [ ] Presente da manhã: o Pokémon gato do jogador traz um item ao acordar (Meowth traz pepita de ouro ou moeda)
-
-### Cães e lobos
-- [x] Esqueletos fogem de 27 Pokémon cachorro — **já existe no Cobblemon**
-- [x] Pokémon cachorro (do jogador e selvagens) caçam esqueletos
-- [x] Lobos selvagens (Poochyena, Mightyena, Lycanroc) às vezes caçam Pokémon ovelha selvagens (nunca os de jogador,
-      vila ou colmeia); os outros cachorros não
+- [ ] **(decidir)** Beedrill fora das colmeias (é vespa, não faz mel)
+  - Kakuna penduradas nas árvores de florestas, e Beedrill defendendo a área (território, seção 6)
+  - Beedrill como predador que de vez em quando ataca colmeias de Combee, e a Vespiquen defende
 
 ### Galinhas
-- [x] **Só as fêmeas** botam ovos (as aves dos currais e as mesmas espécies no pasto) — *a testar no jogo*
-- [x] **No pasto**: fêmeas de Doduo, Psyduck, Torchic, Delibird, Piplup e evoluções botam ovos, como nos currais
-- [ ] **Combusken** bota ovos de tempos em tempos (pasto e currais de vila)
-  - Torchic não: é um pintinho
-  - Chansey não: o ovo dela não é de galinha
-  - Minecraft 1.21.1 só tem o ovo comum (os ovos azul e marrom de clima chegaram no 1.21.5)
+- [ ] **Combusken** bota ovos de tempos em tempos (pasto e currais). Torchic não (é pintinho); Chansey não
+      (o ovo dela não é de galinha). O 1.21.1 só tem o ovo comum
 
-### Sniffer
-- [ ] Swinub, Piloswine e Lechonk farejam e desenterram sementes antigas (torchflower, pitcher) e cogumelos
+### Gatos
+- [ ] Presente da manhã: o Pokémon gato do jogador traz um item ao acordar (Meowth traz pepita de ouro)
 
 ### Sapos e anfibrilho (froglight)
 O Cobblemon já dá anfibrilho ao derrotar Froakie, Frogadier, Greninja, Politoed, Tadbulb e Bellibolt.
-Sapos: linha do Froakie, Poliwag (o girino!), Politoed, Croagunk, Toxicroak, linha do Tympole, Tadbulb e Bellibolt.
+- [ ] **Na batalha**: Slugma derrotado por um Pokémon sapo solta anfibrilho com 100% de chance (como o sapo
+      vanilla com o magma cube)
+- [ ] **No pasto**: o sapo lambe o Slugma (Lick) e cospe um anfibrilho, mais devagar, sem machucar
+- [ ] Cor pelo bioma, como no vanilla: temperado = ocre, frio = verdejante, quente = perolado
+- [ ] Também com magma cube pequeno, se os slimes estiverem ligados
 
-- [ ] **Na batalha** (como o sapo do vanilla, que mata o magma cube): Slugma derrotado por um Pokémon sapo
-      solta anfibrilho com **100% de chance**
-- [ ] **No pasto** (sem violência): o sapo lambe o Slugma (golpe Lick) e cospe um anfibrilho, mais devagar.
-      O Slugma não se machuca e entra em tempo de espera
-- [ ] Cor do anfibrilho pelo bioma, como no vanilla: temperado = ocre, frio = verdejante, quente = perolado
-- [ ] Também vale com magma cube pequeno, se os slimes estiverem ligados na configuração
-
-### Cabras
-- [ ] Skiddo e Gogoat dão chifre de cabra ao dar cabeçada em pedra ou madeira
-  - Tentado e tirado por enquanto: no teste não se viu nenhum dando cabeçada nem soltando chifre
-
-### Golfinhos
-- [ ] Lapras, Wailmer, Dewgong e Primarina dão "graça do golfinho" a quem nada perto
-- [ ] Wailmer e Lapras levam o jogador até naufrágios e tesouros enterrados (os golfinhos faziam isso)
-
-### Axolotes
-- [ ] Wooper e Mudkip ajudam o jogador a lutar contra afogados embaixo d'água
-
-### Papagaios
-- [ ] Chatot imita sons de mobs hostis por perto (como papagaios avisam)
-- [ ] Oricorio e Chatot dançam perto de uma jukebox tocando
-
-### Tartarugas
-- [ ] Pokémon tartaruga voltam à praia onde nasceram (Squirtle, Tirtouga, Chewtle)
-
-### Raposas
-- [ ] Nickit e Vulpix roubam comida ou itens do chão e fogem; dormem de dia
-
-### Pandas
-- [ ] Pancham e Pangoro comem bambu e espirram (podem soltar slimeball, como o panda filhote)
+### Outros animais
+- [ ] **Sniffer**: Swinub, Piloswine e Lechonk desenterram sementes antigas (torchflower, pitcher) e cogumelos
+- [ ] **Cabras**: Skiddo e Gogoat dão chifre de cabra ao dar cabeçada em pedra ou madeira
+      (tentado e tirado: no teste nenhum dava cabeçada)
+- [ ] **Golfinhos**: Lapras, Wailmer, Dewgong e Primarina dão "graça do golfinho"; Wailmer e Lapras levam a naufrágios
+- [ ] **Axolotes**: Wooper e Mudkip ajudam a lutar contra afogados embaixo d'água
+- [ ] **Papagaios**: Chatot imita sons de mobs hostis por perto; Oricorio e Chatot dançam perto de jukebox
+- [ ] **Tartarugas**: Squirtle, Tirtouga e Chewtle voltam à praia onde nasceram
+- [ ] **Raposas**: Nickit e Vulpix roubam comida ou itens do chão e fogem; dormem de dia
+- [ ] **Pandas**: Pancham e Pangoro comem bambu e espirram (slimeball, como o panda filhote)
+- [ ] **Jóquei de aranha**: o esqueleto montar num Ariados?
 
 ---
 
 ## 4. Fazendas no pasto (Pasture Block do Cobblemon)
 
-Regra geral: produção lenta, com tempo de espera. Talvez exija o Pokémon feliz ou alimentado, para não ficar forte demais.
+Produção lenta, com tempo de espera. Talvez exija o Pokémon feliz ou alimentado.
 
-- [x] **Voltar para o pasto** (opção `pasture_return`): Pokémon que saem da área voltam andando. O Cobblemon teleportava
-      e, se não conseguisse, mandava para o PC (por isso era preciso cercar). Agora só teleporta se não conseguir voltar
-      em 30 s ou estiver a mais de 48 blocos, e nunca manda para o PC enquanto o bloco do pasto existir — *a testar no jogo*
-
-- [ ] **Aranhas** (Spinarak, Ariados, Joltik, Galvantula): tecem teias (cobweb) nos cantos e soltam linha
-- [ ] **Tipo Fogo** (linha do Charmander, Fennekin, Houndour): soltam pó de blaze
-- [ ] **Gelatinosos** (Solosis, Grimer, Goomy): soltam slimeball
-- [x] **Abelhas**: Pokémon abelha do jogador no pasto usam colmeias craftadas na área dele (mel e favo)
-- [x] **Aves das galinhas** (só fêmeas): ovos
-- [ ] **Magcargo e Slugma**: transformam pedra em volta em bloco de magma
+- [ ] **Aranhas** (Spinarak, Ariados, Joltik, Galvantula): teias nos cantos e linha
+- [ ] **Tipo Fogo** (linha do Charmander, Fennekin, Houndour): pó de blaze
+- [ ] **Gelatinosos** (Solosis, Grimer, Goomy): slimeball
+- [ ] **Magcargo e Slugma**: pedra em volta vira bloco de magma
 - [ ] **Snorunt e Vanillite**: neve e gelo em volta
-- [ ] **Shuckle**: fermenta frutas guardadas e faz Suco de Fruta (como no jogo original)
+- [ ] **Shuckle**: fermenta frutas guardadas e faz Suco de Fruta
 - [ ] **Clamperl e Shellder**: pérolas, cristais de prismarinho
-- [ ] **Tropius**: fruta no pescoço que dá para colher (maçã ou fruta Pokémon)
+- [ ] **Tropius**: fruta no pescoço para colher
 - [ ] **Gastly e Haunter**: membrana de phantom de vez em quando à noite
-- [ ] **Sableye e Carbink**: acham minérios pequenos (cuidado com balanceamento)
+- [ ] **Sableye e Carbink**: minérios pequenos (cuidado com balanceamento)
 - [ ] **Exeggcute**: ovos
 
 ---
 
-## 5. Flora — comportamentos dos Pokémon planta
+## 5. Flora — Pokémon planta
 
 - [ ] Tipo Planta aceleram plantações em volta (Bulbasaur, Oddish, Bellsprout, Chikorita, Sunkern)
-- [ ] Seedot e Sunkern plantam mudas e sementes perto de onde andam
-- [ ] **Fotossíntese**: Pokémon planta se curam devagar sob o sol e ficam mais lentos à noite
-- [ ] Sunflora vira o rosto para o sol durante o dia
-- [ ] Bellossom dança quando faz sol
+- [ ] Seedot e Sunkern plantam mudas e sementes por onde andam
+- [ ] **Fotossíntese**: se curam devagar sob o sol e ficam mais lentos à noite
+- [ ] Sunflora vira o rosto para o sol; Bellossom dança quando faz sol
 - [ ] Cherrim muda de forma com o tempo (sol ou nublado)
 - [ ] Sudowoodo finge ser árvore: congela quando o jogador olha e foge da água
-  - Tentado e tirado por enquanto: ele parava de andar, mas não ficava parado na pose característica
+      (tentado e tirado: parava de andar, mas sem a pose)
 - [ ] Shroomish, Breloom, Paras e Parasect espalham cogumelos e micélio
 - [ ] Foongus e Amoonguss se disfarçam de Pokébola no chão
 - [ ] Lotad cria vitórias-régias na água
 - [ ] Sewaddle e Swadloon comem folhas de árvores
-- [ ] Phantump e Trevenant aparecem perto de árvores mortas ou florestas escuras
+- [ ] Phantump e Trevenant perto de árvores mortas ou florestas escuras
 - [ ] Pokémon planta evitam fogo e Pokémon tipo Fogo
 - [ ] Snover e Abomasnow deixam neve por onde passam em biomas frios
 
@@ -243,133 +160,53 @@ Regra geral: produção lenta, com tempo de espera. Talvez exija o Pokémon feli
 
 ## 6. Combate e vida selvagem
 
-O Cobblemon já marca 564 espécies como "se defendem" (`willDefendSelf`), mas só 3 têm a briga corpo a corpo
-(`fightsMelee`) ligada. O mod já sabe ligar a briga por código numa entidade (`PokemonAi.addBehaviours`),
-como nos cachorros e nos Golurk.
+O Cobblemon marca 564 espécies como "se defendem" (`willDefendSelf`), mas só 3 brigam corpo a corpo. O mod já
+faz Pokémon caçarem com os próprios golpes (`Hunts`), então dá para reaproveitar.
 
 - [ ] **Revide**: Pokémon selvagens que apanham do jogador revidam
 - [ ] **Temperamento por espécie**: agressivos (Tauros, Gyarados, Beedrill, Mankey), medrosos (Pidgey, Rattata, Wooloo) e neutros
 - [ ] Natureza influencia o temperamento (Adamant e Brave mais bravos; Timid foge)
-- [ ] Bando defende o filhote: atacar um bebê deixa os adultos do bando bravos
-- [ ] **Predador e presa**: Persian caça Rattata, Pidgeot caça Magikarp; presas fogem de predadores
-- [ ] **Território**: Beedrill e Kakuna defendem área perto das árvores onde ficam
-- [ ] Pokémon selvagens atacam mobs hostis que chegam perto (já existe comportamento para Pokémon do jogador)
+- [ ] Bando defende o filhote: atacar um bebê deixa os adultos bravos
+- [ ] **Predador e presa**: Persian caça Rattata, Pidgeot caça Magikarp; presas fogem
+- [ ] **Território**: Beedrill e Kakuna defendem a área das árvores onde ficam
+- [ ] Pokémon selvagens atacam mobs hostis que chegam perto
 
 ---
 
-## 7. Rotina e ambiente
+## 7. Saqueadores e bruxas com Pokémon
+
+- [ ] Saqueadores com Houndour, Houndoom ou Mightyena
+- [ ] Vindicadores com Pawniard ou Bisharp (lâminas, combinam com o machado)
+- [ ] Bruxas comuns (fora da cabana) com Murkrow, Honchkrow ou Mismagius
+- [ ] Ilusionista com Zorua ou Zoroark
+- [ ] Evocador com Shuppet ou Gastly
+- [ ] **(decidir)** Devastador → **Rhyhorn / Rhydon**, montado pelos saqueadores nas invasões. Se casar bem, o devastador sai
+
+---
+
+## 8. Rotina e ambiente
 
 - [ ] **Dia e noite**: noturnos (Hoothoot, Zubat, Gastly, Murkrow) dormem de dia e saem à noite
 - [ ] Zubat e Woobat dormem de cabeça para baixo no teto das cavernas
-- [ ] **Chuva**: tipo Fogo procuram abrigo; tipo Água e Lotad ficam felizes na chuva
-- [ ] **Tempestade**: tipo Elétrico são atraídos por para-raios e ficam agitados com raios
+- [ ] **Chuva**: tipo Fogo procuram abrigo; tipo Água e Lotad ficam felizes
+- [ ] **Tempestade**: tipo Elétrico atraídos por para-raios e agitados com raios
 - [ ] Pokémon vão beber água de vez em quando
-- [ ] Pokémon selvagens comem frutas das árvores de fruta do Cobblemon
+- [ ] Selvagens comem frutas das árvores de fruta do Cobblemon
 - [ ] **Atrair com comida**: selvagens seguem quem segura a comida favorita (como vacas seguem trigo)
 - [ ] Bebês seguem os adultos da mesma linha evolutiva
 - [ ] Bandos de Wingull e Pelipper voando sobre o mar
 - [ ] Magikarp pulando na água e subindo cachoeiras
-- [ ] Murkrow e Meowth pegam itens brilhantes (ouro, diamante) do chão
+- [ ] Murkrow e Meowth pegam itens brilhantes do chão
 - [ ] Sableye comem minérios expostos nas cavernas
-- [ ] Rattata e Bunnelby comem plantações (praga). Gatos espantam eles
+- [ ] Rattata e Bunnelby comem plantações (praga); gatos espantam eles
 - [ ] Snorlax dorme no meio do caminho e come plantações
 - [ ] Ditto se transforma no Pokémon mais próximo
 
 ---
 
-## 8. Habitantes do Minecraft com Pokémon
-
-O tema do mod: os Pokémon convivem com o mundo e com os habitantes do Minecraft. O mercador ter Pokémon
-é lógico, então aldeões e saqueadores também podem ter.
-
-### Guardiões das vilas
-- [x] **Golett e Golurk** no lugar do golem de ferro (40% Golurk nível 43–50, 60% Golett nível 20–30)
-- [x] Golem de ferro não é mais montado com abóbora
-- [ ] Craft do Golett (ex.: abóbora sobre blocos de argila ou terra, como o golem de barro da lenda)
-- [ ] Golurk "cansado" volta para o centro da vila (sino) em vez do ponto onde nasceu
-- [ ] Growlithe guardiões ajudam o golem de ferro (como os cães policiais do anime)
-- [ ] Pokémon da vila ficam calmos perto de aldeões e fogem de zumbis
-- [ ] Aldeões fazendeiros "ordenham" Miltank e recolhem ovos dos currais
-
-### Aldeões com Pokémon
-Só aldeões **nascidos com a vila** (20% deles); aldeões de reprodução não adotam, por enquanto. O aldeão espera
-arrumar profissão (até 2 dias do jogo) para o Pokémon combinar com ela. Honedge é mais raro (35% dos ferreiros
-de armas; os outros ganham um "qualquer um").
-
-Teste rápido no jogo:
-`/summon minecraft:villager ~ ~ ~ {NeoForgeData:{"cobblemon_ecosystems:adopt":1b,"cobblemon_ecosystems:adopt_species":"pichu"}}`
-
-| Profissão | Pokémon | Por quê |
-|---|---|---|
-| Armeiro (armorer) | Aron, Lairon | Comem ferro e têm couraça de aço |
-| Ferreiro de armas (weaponsmith) | Honedge | É uma espada |
-| Ferreiro de ferramentas (toolsmith) | Klefki, Roggenrola | Chaves e minério |
-| Pedreiro (mason) | Timburr, Gurdurr | Carregam vigas e trabalham em obras |
-| Flecheiro (fletcher) | Rowlet | As penas da evolução final viram flechas |
-| Fazendeiro | Bulbasaur, Oddish, Skiddo | Ajudam nas plantações |
-| Pescador | Wingull | Vive no mar |
-| Pastor | Wooloo, Mareep | Lã |
-| Clérigo | Chansey, Audino | Curandeiros |
-| Bibliotecário | Abra, Natu | Psíquicos e estudiosos |
-| Cartógrafo | Hoothoot, Pidgey | Navegação (os pequenos, para caberem na cabeça) |
-| Curtumeiro (leatherworker) | Smeargle | Pinta e tinge |
-| Açougueiro | Farfetch'd | Carrega um alho-poró (cozinha) |
-| Desempregado ou bobo (nitwit) | Slowpoke, Psyduck | Sem pressa nenhuma |
-| Criança aldeã | Pichu, Togepi | Brincam juntos |
-| Qualquer um (20%) | Pidgey, Pichu | Só acompanham o aldeão |
-
-- [x] Pokémon do aldeão segue ele e volta para perto se se afastar
-- [x] Pokémon pequenos (Pidgey, Pichu, Natu, Rowlet, Togepi) **ficam em cima da cabeça** do aldeão (testar no jogo)
-  - O "ombro" do Cobblemon é só para jogadores. Para aldeões daria para usar o sistema de **passageiro**
-    do Minecraft (o Pokémon "monta" no aldeão), que é o mesmo das galinhas jóquei. Precisa testar a
-    posição e como fica a IA do aldeão
-- [ ] Pokémon do aldeão ajudam na profissão (Timburr carrega blocos, Bulbasaur acelera plantações)
-- [x] **Batalha com aldeões** (agachar + clique direito, ou lançar Pokémon no aldeão ou no pet), como a do mercador
-  - Personalidade por aldeão (pacífico, amigável, competitivo, desafiador), sorteada pela profissão: os pacíficos e as
-    crianças recusam; os desafiadores têm Pokémon mais fortes e até 2 a mais no time (só um aparece)
-  - Durante a batalha o pet vai para a Pokébola e uma cópia batalha
-  - Vencer: desconto nas trocas (reputação permanente + temporária); aldeões sem profissão dão esmeraldas
-  - Descanso: 2 dias na Pokébola; com máquina de cura do Cobblemon por perto, o aldeão leva o pet até ela, o pet volta
-    na hora e outra batalha só 1 dia depois
-- [x] Pet do aldeão protegido: não entra em batalha selvagem e não leva dano de jogadores
-- [x] Pet teleporta para o aldeão a 16 blocos; aldeão faz carinho no pet de vez em quando (corações)
-- [x] Pet defende o aldeão de monstros; derrotado, vai para a Pokébola e descansa (não morre)
-- [x] Aldeão que vira zumbi guarda o pet; curado, o pet volta
-- [x] Pet que some de verdade (só pelo /kill): o aldeão adota outro depois de 3 dias
-- [ ] Guardiões (Golett, Golurk) desafiáveis como "guardião da vila" (por enquanto não)
-- [ ] **Nomes de aldeões**: cada aldeão com pet ganha um nome ("Ash, o Ferreiro") e o pet leva o nome dele
-      ("Aron do Ash"), para saber qual Pokémon é de qual aldeão
-- [ ] Máquina de cura: tocar a animação e o som de cura de verdade quando o aldeão cura o pet (hoje só partículas e um som)
-- [ ] Aldeões de reprodução também adotarem (mais tarde)
-
-### 8.1 Saqueadores (illagers) com Pokémon
-- [ ] Saqueadores com Houndour, Houndoom ou Mightyena (cães sombrios)
-- [ ] Vindicadores com Pawniard ou Bisharp (lâminas, combinam com o machado)
-- [ ] Bruxas com Murkrow, Honchkrow ou Mismagius
-- [x] Gato da cabana da bruxa vira **Purrloin** (ou Liepard)
-- [x] Purrloin/Liepard da bruxa com textura de gato preto e olhos laranja (shiny: branco de olhos roxos)
-- [x] **Purrloin como pet da bruxa** da cabana (só a que nasce com a cabana; as da farm de bruxa continuam normais) — *a testar no jogo*
-  - Segue a bruxa, não leva dano de jogadores e é incapturável
-  - Se a bruxa morrer, o Purrloin foge e some
-  - Sem gato por perto (mundos antigos), a bruxa conjura um Purrloin preto depois de 1 minuto
-- [x] **Bruxa da cabana neutra**: só ataca quem a atacou, por 2 minutos
-- [x] **Batalha com a bruxa** (agachar + clique direito, ou lançar Pokémon nela ou no gato): o gato e mais um Pokémon
-      sombrio (Murkrow, Misdreavus ou Gastly). Vencer é o único jeito de ganhar o Purrloin (só quem venceu captura); a
-      bruxa fica sem gato e só adota outro 3 dias depois. Brava com o jogador, ela recusa
-- [ ] Ilusionista com Zorua ou Zoroark (Pokémon da ilusão)
-- [ ] Evocador com Shuppet ou Gastly
-- [ ] **(decidir)** Devastador → **Rhyhorn / Rhydon**: rinoceronte de pedra, parecido com o devastador, que
-      poderia ser montado pelos saqueadores nas invasões. Se casar bem, aí sim o devastador sai
-- [x] **Postos de saqueadores com Pokémon preso** na jaula do golem de ferro (opção `outpost_captives`): Golett,
-      Growlithe, Ponyta, Mudbray, Riolu, Eevee, Larvitar ou Absol, nível 15–30, selvagem e capturável; não some
-      sozinho. As jaulas de allay continuam — *a testar no jogo*
-
----
-
 ## 9. Mercador ambulante
 
-- [ ] Variar a montaria por bioma (Camerupt no deserto, Mamoswine na neve, Rapidash nas planícies)
-- [ ] Manta nas outras montarias, se houver variação
+- [ ] Montaria por bioma (Camerupt no deserto, Mamoswine na neve, Rapidash nas planícies), com manta própria
 - [ ] Trocas com itens do Cobblemon (frutas, apricorns, Pokébolas)
 - [ ] Pokémon do mercador com nível que acompanha o progresso do jogador
 
@@ -377,20 +214,13 @@ Teste rápido no jogo:
 
 ## 10. Ideia futura: couro sintético (analisada, não implementar agora)
 
-**Lógica**: couro é pele, então só deveria sair derrotando um Pokémon (como já acontece no Cobblemon).
-Uma alternativa sem violência precisaria de um material *diferente*, e não de couro de verdade.
+Couro é pele, então só deveria sair derrotando um Pokémon (como já acontece no Cobblemon). Uma alternativa sem
+violência precisa de um material **diferente**.
 
-**Melhor candidato: Trubbish e Garbodor.** Eles são feitos de lixo e sacos plásticos, então "reciclar lixo
-em material sintético" combina com a espécie.
+**Melhor candidato: Trubbish e Garbodor** (feitos de lixo e sacos plásticos). No pasto, Garbodor processa carne
+podre e solta **Couro Sintético**, um item novo, aceito nas receitas de couro por receita alternativa ou tag.
+Dá utilidade à carne podre e tem justificativa no Pokémon. Falta decidir: armadura igual à normal? tempo de
+produção? textura do item.
 
-- No pasto, Garbodor "processa" carne podre (que zumbis dão em quantidade) e solta **Couro Sintético**
-- O couro sintético seria um **item novo**, não o couro do Minecraft. Daria para usar nas receitas que
-  pedem couro (livro, moldura, armadura de couro) por meio de receitas alternativas ou de uma tag de itens
-- Vantagens: dá utilidade à carne podre, não "mata" ninguém e tem justificativa no próprio Pokémon
-- Cuidados: decidir se a armadura de couro sintético é igual à normal; balancear o tempo de produção;
-  dar uma textura própria ao item
-
-Outras opções avaliadas:
-- **Grimer e Muk** (lodo vira polímero): faz sentido, mas eles já são a fonte de slimeball
-- **Receita na panela de fogueira** (linha + slimeball + cera de mel): não precisa de Pokémon e é menos interessante
-- **Couro de coelho**: o Minecraft já transforma 4 peles de coelho em couro, mas essas peles também saem derrotando Pokémon
+Descartados: Grimer e Muk (já dão slimeball), receita na fogueira (sem Pokémon), couro de coelho (também sai
+derrotando Pokémon).
