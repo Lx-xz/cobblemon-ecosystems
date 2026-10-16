@@ -6,6 +6,12 @@
 <summary><b>🇺🇸 English</b></summary>
 
 ### New
+- **Passive pasture farms**: comfortable Pokémon drop items on their own, faster when happy (they never break anything)
+  - Fire Pokémon standing on heat blocks (magma, netherrack...): blaze powder every 10 min
+  - Bibarel with water, earth and trees in the habitat: a log of the forest biome's wood every 15 min (birch in birch forests, spruce in taigas, dark oak in dark forests...)
+  - Bidoof with water and trees: 2 sticks every 10 min
+  - The habitat report shows what each Pokémon produces, when, and what is missing
+- **Habitats book**: every player gets a book on first join with how habitats work and a page per type with what it likes and dislikes
 - **Pasture habitats**: the space Pokémon can reach around the Pasture Block (up to 10 blocks, walls and fences close it) is their home
   - Each type likes and dislikes some surroundings: Fire likes lava and magma and dislikes water, Water likes a pool, Grass likes plants and open sky, Steel likes iron blocks... Some species have their own taste (Zubat and Woobat like darkness and a roof)
   - That sets how comfortable each Pokémon is: Happy, Comfortable, Neutral or Uncomfortable. Cramped pastures make them less comfortable
@@ -39,6 +45,12 @@
 <summary><b>🇧🇷 Português</b></summary>
 
 ### Novidades
+- **Farms passivas no pasto**: Pokémon confortáveis soltam itens sozinhos, mais rápido quando felizes (sem quebrar nada)
+  - Pokémon de Fogo pisando em blocos de calor (magma, netherrack...): pó de blaze a cada 10 min
+  - Bibarel com água, terra e árvores no habitat: um tronco da madeira do bioma a cada 15 min (bétula nas florestas de bétula, abeto nas taigas, carvalho-escuro na floresta escura...)
+  - Bidoof com água e árvores: 2 gravetos a cada 10 min
+  - O relatório do habitat mostra o que cada Pokémon produz, quando, e o que está faltando
+- **Livro dos habitats**: cada jogador ganha um livro ao entrar no mundo pela primeira vez, com como funcionam os habitats e uma página por tipo com do que ele gosta e não gosta
 - **Habitats do pasto**: o espaço que os Pokémon alcançam em volta do bloco do pasto (até 10 blocos, paredes e cercas fecham) é a casa deles
   - Cada tipo gosta e não gosta de certas coisas em volta: Fogo gosta de lava e magma e não gosta de água, Água gosta de uma piscina, Planta gosta de plantas e céu aberto, Metal gosta de blocos de ferro... Algumas espécies têm gosto próprio (Zubat e Woobat gostam de escuro e de teto)
   - Isso decide o conforto de cada Pokémon: Feliz, Confortável, Neutro ou Desconfortável. Pasto apertado deixa menos confortável

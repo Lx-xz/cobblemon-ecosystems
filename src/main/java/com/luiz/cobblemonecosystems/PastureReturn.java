@@ -62,7 +62,10 @@ public final class PastureReturn {
         }
         if (tethering.getBox().contains(pokemon.getX(), pokemon.getY(), pokemon.getZ())) {
             returning.remove(pokemon);
-            if (Habitat.enabled() && pokemon.level() instanceof ServerLevel level) roam(pokemon, tethering, level);
+            if (Habitat.enabled() && pokemon.level() instanceof ServerLevel level) {
+                roam(pokemon, tethering, level);
+                PastureFarms.tick(pokemon, level);
+            }
             return false;
         }
         BlockPos pasturePos = tethering.getPasturePos();

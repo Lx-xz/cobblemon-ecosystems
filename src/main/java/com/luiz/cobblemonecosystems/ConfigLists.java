@@ -57,6 +57,17 @@ public final class ConfigLists {
         return entry instanceof String;
     }
 
+    /** Para listas com formato próprio (ex.: as farms): o resultado do parser fica guardado até a lista mudar. */
+    public static <T> T cachedList(ModConfigSpec.ConfigValue<List<? extends String>> value, Function<List<? extends String>, T> parser) {
+        return cached(value, parser);
+    }
+
+    /** Avisa no log que a entrada foi ignorada e devolve null. */
+    public static <T> T invalid(ModConfigSpec.ConfigValue<?> value, String entry, String problem) {
+        warn(value, entry, problem);
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     private static <T> T cached(ModConfigSpec.ConfigValue<List<? extends String>> value, Function<List<? extends String>, T> parser) {
         List<? extends String> raw = value.get();
@@ -199,9 +210,25 @@ public final class ConfigLists {
         }
     }
 
-    /** Grupos de blocos: {@code "heat:6 = minecraft:lava, #minecraft:campfires"} (sem o número, basta 8 blocos). */
+    /**
+     * Grupos de blocos: {@code "heat:6 = minecraft:lava, #minecraft:campfires"} (sem o número, basta 8 blocos).
+     * Grupos que vêm por padrão e não estão na lista (ex.: um grupo novo numa atualização, num arquivo de
+     * configuração antigo) entram também, para as farms e os gostos que dependem deles não pararem.
+     */
     public static List<BlockGroup> blockGroups(ModConfigSpec.ConfigValue<List<? extends String>> value) {
         return cached(value, raw -> {
+            List<BlockGroup> groups = new ArrayList<>(parseBlockGroups(raw, value));
+            Set<String> names = new HashSet<>();
+            for (BlockGroup g : groups) names.add(g.name());
+            for (BlockGroup g : parseBlockGroups(value.getDefault(), value)) {
+                if (names.add(g.name())) groups.add(g);
+            }
+            return List.copyOf(groups);
+        });
+    }
+
+    private static List<BlockGroup> parseBlockGroups(List<? extends String> raw, ModConfigSpec.ConfigValue<?> value) {
+        {
             List<BlockGroup> groups = new ArrayList<>();
             for (String entry : raw) {
                 if (entry.isBlank()) continue;
@@ -239,8 +266,8 @@ public final class ConfigLists {
                 }
                 groups.add(new BlockGroup(head, target, Set.copyOf(blocks), Set.copyOf(tags)));
             }
-            return List.copyOf(groups);
-        });
+            return groups;
+        }
     }
 
     private static void warn(ModConfigSpec.ConfigValue<?> value, String entry, String problem) {

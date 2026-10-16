@@ -163,7 +163,13 @@ public final class Hunts {
 
     /** Pó na cor oficial do tipo (as mesmas cores dos jogos). */
     private static ParticleOptions typeColor(String type) {
-        int rgb = switch (type) {
+        int rgb = typeRgb(type);
+        return new DustParticleOptions(new Vector3f(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f), 1.3f);
+    }
+
+    /** A cor oficial do tipo, em RGB (também usada no livro dos habitats). */
+    static int typeRgb(String type) {
+        return switch (type) {
             case "fire" -> 0xEE8130;
             case "water" -> 0x6390F0;
             case "electric" -> 0xF7D02C;
@@ -183,7 +189,6 @@ public final class Hunts {
             case "fairy" -> 0xD685AD;
             default -> 0xA8A77A; // normal
         };
-        return new DustParticleOptions(new Vector3f(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f), 1.3f);
     }
 
     private static ParticleOptions particle(String type) {

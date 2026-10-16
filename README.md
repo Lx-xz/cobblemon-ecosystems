@@ -33,6 +33,8 @@ Pokémon are the animals — and the plants, and the creatures of the wild. This
   - **See the habitat** with the house button in the Pokémon interaction wheel, or sneak + right-click a pastured Pokémon holding the Pokédex
   - **Temperament by nature**: homebodies stay close, explorers roam far, and everyone comes home at their species' bedtime
   - Pasture Pokémon walk back when they leave the area, instead of being sent to the PC
+  - **Passive farms**: comfortable Pokémon drop items on their own: Fire Pokémon on heat blocks give blaze powder, Bibarel gives the wood of the forest biome, Bidoof gives sticks
+  - A **habitats book** on first join lists what each type likes and dislikes
 - **Bees**: Combee, Vespiquen, Cutiefly and Ribombee live in beehives, visit flowers, pollinate crops and make honey, in the wild and in a pasture (with a crafted beehive)
 - **The witch's black cat**: the swamp hut cat becomes a black Purrloin with orange eyes (white with purple eyes when shiny), and stays black as Liepard
   - The witch is neutral and keeps it as her pet; it can't be caught or hurt by players
@@ -54,7 +56,7 @@ Pokémon are the animals — and the plants, and the creatures of the wild. This
 ### 🗺️ Planned
 - Villagers herding the pen Pokémon, and quests to earn one instead of catching them
 - Pillagers, vindicators, witches and illusioners with their own Pokémon
-- Pasture farms: Spinarak webs, Charmander blaze powder, Solosis slime balls
+- More pasture farms: Spinarak webs, Solosis slime balls
 - Frog Pokémon and Slugma giving froglights
 - **Flora**: Grass Pokémon tending crops, spreading mushrooms and living by the sun
 - Wild Pokémon fighting back, predators and prey, day and night routines
@@ -102,6 +104,8 @@ Os Pokémon são os animais, e também as plantas e as criaturas selvagens. Este
   - **Ver o habitat** pelo botão de casinha no menu radial do Pokémon, ou agachando e clicando com o botão direito num Pokémon do pasto segurando a Pokédex
   - **Temperamento pela natureza**: caseiros ficam perto, exploradores passeiam longe, e todos voltam para casa na hora de dormir da espécie
   - Pokémon do pasto voltam andando quando saem da área, em vez de irem para o PC
+  - **Farms passivas**: Pokémon confortáveis soltam itens sozinhos: os de Fogo pisando em blocos de calor dão pó de blaze, o Bibarel dá a madeira do bioma de floresta, o Bidoof dá gravetos
+  - Um **livro dos habitats** ao entrar no mundo lista do que cada tipo gosta e não gosta
 - **Abelhas**: Combee, Vespiquen, Cutiefly e Ribombee moram nas colmeias, visitam flores, polinizam plantações e fazem mel, na natureza e no pasto (com uma colmeia craftada)
 - **Gato preto da bruxa**: o gato da cabana do pântano vira um Purrloin preto de olhos laranja (branco de olhos roxos quando shiny), e continua preto como Liepard
   - A bruxa é neutra e fica com ele de estimação; ele é incapturável e não leva dano de jogadores
@@ -123,7 +127,7 @@ Os Pokémon são os animais, e também as plantas e as criaturas selvagens. Este
 ### 🗺️ Planejado
 - Aldeões pastoreando os Pokémon dos cercados, e missões para ganhar um em vez de capturar
 - Saqueadores, vindicadores, bruxas e ilusionistas com seus próprios Pokémon
-- Fazendas no pasto: teias do Spinarak, pó de blaze do Charmander, slimeball do Solosis
+- Mais farms no pasto: teias do Spinarak, slimeball do Solosis
 - Pokémon sapo e Slugma dando anfibrilho
 - **Flora**: Pokémon planta cuidando das plantações, espalhando cogumelos e vivendo pelo sol
 - Pokémon selvagens revidando, predadores e presas, rotinas de dia e de noite

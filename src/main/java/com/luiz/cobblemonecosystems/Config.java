@@ -57,6 +57,8 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue HABITAT_PARTICLES;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> HABITAT_FEATURES, HABITAT_PREFERENCES;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> HOMEBODY_NATURES, EXPLORER_NATURES;
+    public static final ModConfigSpec.BooleanValue PASTURE_FARMS_ON, GUIDE_BOOK;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> PASTURE_FARMS, BIOME_LOGS;
 
     public static final ModConfigSpec SPEC;
 
@@ -278,6 +280,7 @@ public final class Config {
                                 + "minecraft:chiseled_bookshelf, minecraft:enchanting_table",
                         "fairy:6 = #minecraft:flowers, minecraft:amethyst_block, minecraft:cherry_leaves, minecraft:pink_petals, minecraft:cake",
                         "training:3 = minecraft:target, minecraft:hay_block",
+                        "trees:4 = #minecraft:logs",
                         "cozy:4 = minecraft:hay_block, #minecraft:wool, #minecraft:wool_carpets, #minecraft:beds",
                         "end:4 = minecraft:obsidian, minecraft:crying_obsidian, minecraft:end_stone, minecraft:end_stone_bricks, "
                                 + "minecraft:purpur_block"),
@@ -306,6 +309,35 @@ public final class Config {
         EXPLORER_NATURES = list("explorer_natures", List.of("jolly", "naive", "hasty", "rash", "naughty", "lax", "quirky"),
                 "Natures of explorers: they roam far, but come home to sleep. The others go out now and then.",
                 "Naturezas dos exploradores: passeiam longe, mas voltam para dormir. As outras saem de vez em quando.");
+        PASTURE_FARMS_ON = BUILDER.comment(
+                "Passive farms: some pastured Pokémon drop an item now and then, while comfortable in their habitat.",
+                "Farms passivas: alguns Pokémon do pasto soltam um item de vez em quando, se estiverem confortáveis no habitat.")
+                .define("pasture_farms", true);
+        PASTURE_FARMS = list("pasture_farm_list", List.of(
+                        "bibarel = from:biome_log, every:15, near:water, near:earth, near:trees",
+                        "bidoof = minecraft:stick x2, every:10, near:water, near:trees",
+                        "type:fire = minecraft:blaze_powder, every:10, on:heat"),
+                "\"who = item xCount, every:minutes, on:group, near:group\". Who: a species (\"bibarel\") or a type",
+                "(\"type:fire\"); the first line that fits the Pokémon is used. on: a habitat block group it must stand on.",
+                "near: a group the habitat must have. Item \"from:biome_log\": the wood of the biome (biome_logs).",
+                "Happy Pokémon produce faster.",
+                "\"quem = item xQuantidade, every:minutos, on:grupo, near:grupo\". Quem: espécie ou tipo (\"type:fire\"); vale",
+                "a primeira linha que serve. on: grupo em que precisa pisar. near: grupo que o habitat precisa ter.",
+                "Item \"from:biome_log\": a madeira do bioma (biome_logs). Felizes produzem mais rápido.");
+        BIOME_LOGS = list("biome_logs", List.of(
+                        "minecraft:birch_forest = minecraft:birch_log", "minecraft:old_growth_birch_forest = minecraft:birch_log",
+                        "minecraft:dark_forest = minecraft:dark_oak_log", "minecraft:cherry_grove = minecraft:cherry_log",
+                        "minecraft:mangrove_swamp = minecraft:mangrove_log", "#minecraft:is_taiga = minecraft:spruce_log",
+                        "#minecraft:is_jungle = minecraft:jungle_log", "#minecraft:is_savanna = minecraft:acacia_log",
+                        "#minecraft:is_forest = minecraft:oak_log", "minecraft:swamp = minecraft:oak_log"),
+                "Wood of each forest biome for \"from:biome_log\": \"biome or #tag = item\". The first line that fits is used;",
+                "outside these biomes there is no wood.",
+                "Madeira de cada bioma de floresta para \"from:biome_log\": \"bioma ou #tag = item\". Vale a primeira que",
+                "serve; fora desses biomas não sai madeira.");
+        GUIDE_BOOK = BUILDER.comment(
+                "Give each player a book about habitats the first time they join.",
+                "Dá a cada jogador um livro sobre os habitats na primeira vez que entra no mundo.")
+                .define("guide_book", true);
         BUILDER.pop();
 
         BUILDER.comment("Behaviours / Comportamentos").push("behaviours");

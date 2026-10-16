@@ -91,6 +91,21 @@ public final class HabitatScan {
         if (report.cramped()) space.append(Component.translatable(KEY + "cramped").withStyle(ChatFormatting.RED));
         player.sendSystemMessage(space);
         if (report.lost()) player.sendSystemMessage(Component.translatable(KEY + "lost").withStyle(ChatFormatting.BLUE));
+
+        PastureFarms.State farm = Config.PASTURE_FARMS_ON.get() ? PastureFarms.state(pokemon, report) : null;
+        if (farm != null) {
+            MutableComponent status = switch (farm.status()) {
+                case READY -> Component.translatable(KEY + "farm.ready", farm.minutesLeft()).withStyle(ChatFormatting.GREEN);
+                case NOT_COMFORTABLE -> Component.translatable(KEY + "farm.not_comfortable").withStyle(ChatFormatting.RED);
+                case NOT_NEAR -> Component.translatable(KEY + "farm.not_near",
+                        Component.translatableWithFallback(KEY + "group." + farm.missing(), farm.missing())).withStyle(ChatFormatting.RED);
+                case NOT_ON_BLOCK -> Component.translatable(KEY + "farm.not_on_block",
+                        Component.translatableWithFallback(KEY + "group." + farm.missing(), farm.missing())).withStyle(ChatFormatting.RED);
+                case NOT_IN_FOREST -> Component.translatable(KEY + "farm.not_in_forest").withStyle(ChatFormatting.RED);
+            };
+            Component item = farm.item() != null ? farm.item().getDescription() : Component.translatable(KEY + "farm.biome_log");
+            player.sendSystemMessage(Component.translatable(KEY + "farm", item, farm.minutes(), status).withStyle(ChatFormatting.GRAY));
+        }
     }
 
     /**

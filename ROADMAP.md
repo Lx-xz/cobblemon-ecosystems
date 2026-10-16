@@ -131,7 +131,6 @@ O Cobblemon já dá anfibrilho ao derrotar Froakie, Frogadier, Greninja, Politoe
 Produção lenta, com tempo de espera. Talvez exija o Pokémon feliz ou alimentado.
 
 - [ ] **Aranhas** (Spinarak, Ariados, Joltik, Galvantula): teias nos cantos e linha
-- [ ] **Tipo Fogo** (linha do Charmander, Fennekin, Houndour): pó de blaze
 - [ ] **Gelatinosos** (Solosis, Grimer, Goomy): slimeball
 - [ ] **Magcargo e Slugma**: pedra em volta vira bloco de magma
 - [ ] **Snorunt e Vanillite**: neve e gelo em volta
