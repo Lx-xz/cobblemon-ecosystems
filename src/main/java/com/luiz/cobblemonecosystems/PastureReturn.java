@@ -2,6 +2,7 @@ package com.luiz.cobblemonecosystems;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.WeakHashMap;
 
 import com.cobblemon.mod.common.CobblemonBlocks;
@@ -10,31 +11,37 @@ import com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.ai.RestBehaviour;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Pokémon do pasto: voltar para casa.
  * <ul>
- *   <li>Fora da área do Cobblemon (32 blocos): o Cobblemon teleporta o Pokémon e, se não conseguir, manda para o PC
- *       (por isso era preciso cercar). Aqui ele anda de volta; só é teleportado se não conseguir a tempo ou estiver
- *       longe demais, e nunca vai para o PC enquanto o bloco do pasto existir.</li>
- *   <li>Dentro da área, mas fora do {@link Habitat}: a IA do Cobblemon continua mandando no passeio. O Pokémon só é
- *       chamado de volta para o habitat depois de um tempo fora, que depende do temperamento (caseiro, equilibrado ou
- *       explorador), e na hora de dormir da espécie todos voltam para casa (os noturnos, de dia). Quem não consegue voltar é teleportado e fica triste
- *       por um tempo.</li>
+ *   <li>Dentro da área do Cobblemon (32 blocos), mas fora do {@link Habitat}: a IA do Cobblemon continua mandando no
+ *       passeio. O Pokémon só é chamado de volta para o habitat depois de um tempo fora, que depende do temperamento
+ *       (caseiro, equilibrado ou explorador), e na hora de dormir da espécie todos voltam para casa (os noturnos, de dia).</li>
+ *   <li>Fora da área do Cobblemon: o Cobblemon teleportaria o Pokémon ou mandaria para o PC. Aqui ele anda de volta, e
+ *       nunca vai para o PC enquanto o bloco do pasto existir.</li>
+ *   <li>Quem não acha o caminho de volta em 30 s <b>se perde</b>: fica triste, o dono recebe um aviso com onde ele está,
+ *       e de tempos em tempos ele tenta voltar de novo. O jeito certo é ir buscar: chegando perto, ele segue o dono até
+ *       em casa. (Com {@code pasture_get_lost} desligado, ele é teleportado para casa, como antes.)</li>
  * </ul>
  * Chamado pelo {@code PokemonEntityMixin} no lugar de {@code PokemonEntity.checkPastureTether()}, a cada tick.
  */
 public final class PastureReturn {
-    /** Tentando voltar por mais que isso (30 s), é teleportado. */
+    /** Tentando voltar por mais que isso (30 s), se perde. */
     private static final long GIVE_UP_TICKS = 600;
-    /** Mais longe que isso da área (em blocos), é teleportado direto. */
-    private static final double MAX_STRAY = 48;
+    /** Perdido, tenta voltar sozinho de novo a cada 5 minutos. */
+    private static final long LOST_RETRY_TICKS = 6000;
+    /** O dono a essa distância "encontra" o Pokémon perdido, que passa a segui-lo. */
+    private static final double FOUND_DISTANCE = 6;
     /** De quantos em quantos ticks renova o caminho de volta. */
     private static final int REPATH_TICKS = 20;
     /** Tempo fora do habitat antes de voltar: caseiro 10 s, equilibrado 2 min, explorador 6 min. */
@@ -42,11 +49,9 @@ public final class PastureReturn {
     /** De quanto em quanto tempo cada Pokémon mostra as partículas do conforto. */
     private static final int PARTICLE_TICKS = 160;
 
-    /** Pokémon voltando para a área do Cobblemon → desde quando. Fraco: some junto com a entidade. */
-    private static final Map<PokemonEntity, Long> returning = new WeakHashMap<>();
-    /** Pokémon fora do habitat → desde quando. */
+    /** Pokémon fora do habitat → desde quando. Fracos: somem junto com a entidade. */
     private static final Map<PokemonEntity, Long> away = new WeakHashMap<>();
-    /** Pokémon voltando para o habitat → para onde e desde quando. */
+    /** Pokémon voltando para casa → para onde e desde quando. */
     private record Homeward(BlockPos target, long since) {}
     private static final Map<PokemonEntity, Homeward> homeward = new WeakHashMap<>();
 
@@ -56,76 +61,107 @@ public final class PastureReturn {
     public static boolean handle(PokemonEntity pokemon) {
         if (pokemon.level().isClientSide() || !Config.PASTURE_RETURN.get()) return false;
         PokemonPastureBlockEntity.Tethering tethering = pokemon.getTethering();
-        if (tethering == null) {
+        if (tethering == null || !(pokemon.level() instanceof ServerLevel level)) {
             forget(pokemon);
             return false;
         }
-        if (tethering.getBox().contains(pokemon.getX(), pokemon.getY(), pokemon.getZ())) {
-            returning.remove(pokemon);
-            if (Habitat.enabled() && pokemon.level() instanceof ServerLevel level) {
-                roam(pokemon, tethering, level);
-                PastureFarms.tick(pokemon, level);
-            }
-            return false;
-        }
+        boolean inArea = tethering.getBox().contains(pokemon.getX(), pokemon.getY(), pokemon.getZ());
+        if (inArea && Habitat.enabled()) PastureFarms.tick(pokemon, level);
+        if (inArea && !Habitat.enabled()) return false;
+
         BlockPos pasturePos = tethering.getPasturePos();
-        BlockState pasture = pokemon.level().getBlockState(pasturePos);
+        BlockState pasture = level.getBlockState(pasturePos);
         // Sem o bloco do pasto, deixa o Cobblemon mandar para o PC, como sempre.
         if (!pasture.is(CobblemonBlocks.PASTURE)) return false;
-        // Em batalha ou ocupado: espera terminar.
-        if (pokemon.isBusy()) return true;
-
-        long now = pokemon.level().getGameTime();
-        long since = returning.computeIfAbsent(pokemon, p -> now);
-        double stray = Math.sqrt(tethering.getBox().distanceToSqr(pokemon.position()));
-        BlockPos front = front(pasturePos, pasture);
-        if (now - since < GIVE_UP_TICKS && stray <= MAX_STRAY) {
-            if ((now - since) % REPATH_TICKS == 0) PokemonAi.walkTo(pokemon, front, 0.6f, 1);
-            return true;
-        }
-        // Não conseguiu voltar: teleporta para a frente do pasto (ou em volta dele) e tenta de novo depois.
-        returning.remove(pokemon);
-        if (!teleportNear(pokemon, front)) returning.put(pokemon, now);
-        return true;
+        guide(pokemon, tethering, level, pasturePos, pasture, inArea);
+        // Fora da área, o Cobblemon não faz nada (ele mandaria para o PC); dentro, deixa ele seguir normal.
+        return !inArea;
     }
 
     private static void forget(PokemonEntity pokemon) {
-        returning.remove(pokemon);
         away.remove(pokemon);
         homeward.remove(pokemon);
     }
 
-    /** Dentro da área do Cobblemon: partículas do conforto e a volta para o habitat. */
-    private static void roam(PokemonEntity pokemon, PokemonPastureBlockEntity.Tethering tethering, ServerLevel level) {
+    /** Decide se o Pokémon precisa voltar para casa, se perdeu ou foi encontrado. */
+    private static void guide(PokemonEntity pokemon, PokemonPastureBlockEntity.Tethering tethering, ServerLevel level,
+                              BlockPos pasturePos, BlockState pasture, boolean inArea) {
         long now = level.getGameTime();
         if ((now + pokemon.getId()) % PARTICLE_TICKS == 0) showComfort(pokemon, level);
         if ((now + pokemon.getId()) % REPATH_TICKS != 0 || pokemon.isBusy() || pokemon.isPassenger()) return;
 
-        BlockPos pasturePos = tethering.getPasturePos();
-        Habitat.Survey survey = Habitat.survey(level, pasturePos);
-        // Sem espaço em volta do bloco não há habitat para voltar.
-        if (survey.isEmpty() || survey.contains(pokemon.blockPosition())) {
+        Habitat.Survey survey = Habitat.enabled() ? Habitat.survey(level, pasturePos) : null;
+        boolean home = survey == null || survey.isEmpty() ? inArea : survey.contains(pokemon.blockPosition());
+        if (home) {
             away.remove(pokemon);
             homeward.remove(pokemon);
+            if (isLost(pokemon)) found(pokemon, tethering, level);
             return;
+        }
+
+        // Perdido: se o dono chegou perto, segue o dono; senão tenta voltar sozinho de vez em quando.
+        if (isLost(pokemon)) {
+            Player owner = level.getPlayerByUUID(tethering.getPlayerId());
+            if (owner != null && owner.distanceTo(pokemon) <= FOUND_DISTANCE) {
+                homeward.remove(pokemon);
+                PokemonAi.walkTo(pokemon, owner, 0.6f, 2);
+                return;
+            }
+            long lostAt = pokemon.getPersistentData().getLong(Habitat.LOST_AT_KEY);
+            if (!homeward.containsKey(pokemon) && (now - lostAt) % LOST_RETRY_TICKS >= REPATH_TICKS) return;
         }
 
         long awaySince = away.computeIfAbsent(pokemon, p -> now);
         Homeward going = homeward.get(pokemon);
         if (going == null) {
-            if (!bedtime(pokemon, level) && now - awaySince < awayLimit(Habitat.temperament(pokemon))) return;
-            List<BlockPos> floor = survey.floor();
-            going = new Homeward(floor.get(pokemon.getRandom().nextInt(floor.size())), now);
+            boolean mustReturn = !inArea || isLost(pokemon) || bedtime(pokemon, level)
+                    || now - awaySince >= awayLimit(Habitat.temperament(pokemon));
+            if (!mustReturn) return;
+            List<BlockPos> floor = survey == null ? List.of() : survey.floor();
+            BlockPos target = floor.isEmpty() ? front(pasturePos, pasture) : floor.get(pokemon.getRandom().nextInt(floor.size()));
+            going = new Homeward(target, now);
             homeward.put(pokemon, going);
         }
         if (now - going.since() < GIVE_UP_TICKS) {
-            PokemonAi.walkTo(pokemon, going.target(), 0.5f, 1);
+            PokemonAi.walkTo(pokemon, going.target(), inArea ? 0.5f : 0.6f, 1);
             return;
         }
-        // Não achou o caminho de casa: volta por teleporte, mas fica triste por um tempo.
+        // Não achou o caminho de casa.
         homeward.remove(pokemon);
-        away.remove(pokemon);
-        if (teleportNear(pokemon, going.target())) pokemon.getPersistentData().putLong(Habitat.LOST_AT_KEY, now);
+        if (!Config.PASTURE_GET_LOST.get()) {
+            away.remove(pokemon);
+            teleportNear(pokemon, going.target());
+        } else if (!isLost(pokemon)) {
+            getLost(pokemon, tethering, level);
+        }
+    }
+
+    public static boolean isLost(PokemonEntity pokemon) {
+        return pokemon.getPersistentData().getBoolean(Habitat.LOST_KEY);
+    }
+
+    private static void getLost(PokemonEntity pokemon, PokemonPastureBlockEntity.Tethering tethering, ServerLevel level) {
+        pokemon.getPersistentData().putBoolean(Habitat.LOST_KEY, true);
+        pokemon.getPersistentData().putLong(Habitat.LOST_AT_KEY, level.getGameTime());
+        PokemonAi.stop(pokemon);
+        Player owner = level.getPlayerByUUID(tethering.getPlayerId());
+        if (owner != null) {
+            BlockPos pos = pokemon.blockPosition();
+            owner.sendSystemMessage(Component.translatable(CobblemonEcosystems.MOD_ID + ".habitat.got_lost",
+                    pokemon.getName(), pos.getX(), pos.getY(), pos.getZ()).withStyle(ChatFormatting.BLUE));
+        }
+    }
+
+    private static void found(PokemonEntity pokemon, PokemonPastureBlockEntity.Tethering tethering, ServerLevel level) {
+        pokemon.getPersistentData().remove(Habitat.LOST_KEY);
+        level.sendParticles(ParticleTypes.HEART, pokemon.getX(), pokemon.getY() + pokemon.getBbHeight() + 0.3, pokemon.getZ(),
+                4, 0.3, 0.2, 0.3, 0);
+        UUID ownerId = tethering.getPlayerId();
+        Player owner = level.getPlayerByUUID(ownerId);
+        if (owner != null && owner.distanceTo(pokemon) < 32) {
+            owner.displayClientMessage(Component.translatable(CobblemonEcosystems.MOD_ID + ".habitat.back_home", pokemon.getName())
+                    .withStyle(ChatFormatting.GREEN), true);
+        }
     }
 
     private static long awayLimit(Habitat.Temperament temperament) {
@@ -152,11 +188,11 @@ public final class PastureReturn {
 
     /** Feliz: brilhos verdes. Desconfortável ou perdido: lágrimas. */
     private static void showComfort(PokemonEntity pokemon, ServerLevel level) {
-        if (!Config.HABITAT_PARTICLES.get() || pokemon.isBusy()) return;
+        if (!Config.HABITAT_PARTICLES.get() || pokemon.isBusy() || !Habitat.enabled()) return;
         Habitat.Report report = Habitat.report(pokemon);
         if (report == null) return;
         double y = pokemon.getY() + pokemon.getBbHeight() + 0.2;
-        if (report.comfort() == Habitat.Comfort.HAPPY) {
+        if (report.comfort() == Habitat.Comfort.HAPPY && !report.lost()) {
             level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pokemon.getX(), y, pokemon.getZ(), 4, 0.3, 0.2, 0.3, 0);
         } else if (report.comfort() == Habitat.Comfort.UNCOMFORTABLE || report.lost()) {
             level.sendParticles(ParticleTypes.FALLING_WATER, pokemon.getX(), y - 0.3, pokemon.getZ(), 3,

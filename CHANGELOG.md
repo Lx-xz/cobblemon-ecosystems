@@ -1,11 +1,15 @@
 # Changelog
 
-## Unreleased
+## 1.1.1
 
 <details>
 <summary><b>🇺🇸 English</b></summary>
 
 ### New
+- **Names with icons**: villagers with Pokémon get a name ("Ash the Armorer") and their Pokémon too ("Ash's Aron"); the wandering trader (with a star when shiny) and the swamp hut witch get one too. Names show up when you look at them
+- **Battle hint and R key**: looking at someone you can battle shows "Sneak + right-click or R to battle"; pressing Cobblemon's send-out key (R) at them starts the challenge
+- **Lost Pokémon**: a pastured Pokémon that can't find its way home gets lost instead of teleporting: it gets sad, you get a message with where it is, and once you get close it follows you home (`pasture_get_lost`)
+- **`/habitats`** gives the habitats book again
 - **Passive pasture farms**: comfortable Pokémon drop items on their own, faster when happy (they never break anything)
   - Fire Pokémon standing on heat blocks (magma, netherrack...): blaze powder every 10 min
   - Bibarel with water, earth and trees in the habitat: a log of the forest biome's wood every 15 min (birch in birch forests, spruce in taigas, dark oak in dark forests...)
@@ -45,6 +49,10 @@
 <summary><b>🇧🇷 Português</b></summary>
 
 ### Novidades
+- **Nomes com ícones**: aldeões com Pokémon ganham nome ("Ash, o Armeiro") e o Pokémon também ("Aron do Ash"); o mercador ambulante (com estrela quando é shiny) e a bruxa da cabana também. O nome aparece ao olhar para eles
+- **Dica de batalha e tecla R**: olhando para quem dá para desafiar aparece "Shift + clique direito ou R para batalhar"; apertar a tecla de soltar Pokémon do Cobblemon (R) mirando nele começa o desafio
+- **Pokémon perdido**: o Pokémon do pasto que não acha o caminho de casa se perde em vez de ser teleportado: fica triste, você recebe um aviso com onde ele está, e chegando perto ele segue você até em casa (`pasture_get_lost`)
+- **`/habitats`** dá o livro dos habitats de novo
 - **Farms passivas no pasto**: Pokémon confortáveis soltam itens sozinhos, mais rápido quando felizes (sem quebrar nada)
   - Pokémon de Fogo pisando em blocos de calor (magma, netherrack...): pó de blaze a cada 10 min
   - Bibarel com água, terra e árvores no habitat: um tronco da madeira do bioma a cada 15 min (bétula nas florestas de bétula, abeto nas taigas, carvalho-escuro na floresta escura...)

@@ -7,6 +7,7 @@ import java.util.Map;
 import com.luiz.cobblemonecosystems.ConfigLists.Family;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -20,13 +21,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.WrittenBookContent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
  * O livro dos habitats, que cada jogador ganha na primeira vez que entra no mundo: como funciona o habitat do pasto,
  * como ver o conforto, os temperamentos, as farms e uma página por tipo com do que ele gosta e não gosta.
  * As páginas saem da configuração na hora (se as listas forem editadas, o livro acompanha) e os textos são chaves
- * de tradução, então cada jogador lê na língua do seu jogo.
+ * de tradução, então cada jogador lê na língua do seu jogo. O comando {@code /habitats} dá o livro de novo.
  */
 @EventBusSubscriber(modid = CobblemonEcosystems.MOD_ID)
 public final class GuideBook {
@@ -49,6 +51,17 @@ public final class GuideBook {
         player.getPersistentData().put(Player.PERSISTED_NBT_TAG, data);
         ItemStack book = create();
         if (!player.getInventory().add(book)) player.drop(book, false);
+    }
+
+    /** {@code /habitats}: dá o livro de novo (qualquer jogador). */
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("habitats").executes(context -> {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            ItemStack book = create();
+            if (!player.getInventory().add(book)) player.drop(book, false);
+            return 1;
+        }));
     }
 
     public static ItemStack create() {

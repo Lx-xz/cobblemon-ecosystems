@@ -93,7 +93,7 @@
   "cobblemon_ecosystems.habitat.dislikes": "Não gosta: %s",
   "cobblemon_ecosystems.habitat.space": "Espaço: %s blocos de chão por Pokémon",
   "cobblemon_ecosystems.habitat.cramped": " (apertado)",
-  "cobblemon_ecosystems.habitat.lost": "Se perdeu fora do habitat há pouco e está triste.",
+  "cobblemon_ecosystems.habitat.lost": "Está perdido! Vá buscar: chegue perto e ele segue você até em casa.",
   "cobblemon_ecosystems.habitat.empty": "O bloco do pasto não tem espaço livre em volta: o habitat está vazio.",
   "cobblemon_ecosystems.habitat.group.heat": "Calor",
   "cobblemon_ecosystems.habitat.group.water": "Água",
@@ -155,5 +155,14 @@
   "cobblemon_ecosystems.habitat.farm.biome_log": "Madeira do bioma",
   "cobblemon_ecosystems.habitat.group.trees": "Árvores",
   "cobblemon_ecosystems.guide.farm.near": "(com %s)",
-  "cobblemon_ecosystems.configuration.biome_logs": "Madeira de cada bioma"
+  "cobblemon_ecosystems.configuration.biome_logs": "Madeira de cada bioma",
+  "cobblemon_ecosystems.habitat.got_lost": "Seu %s se perdeu e não acha o caminho de casa. Ele está perto de %s, %s, %s.",
+  "cobblemon_ecosystems.habitat.back_home": "%s voltou para casa!",
+  "cobblemon_ecosystems.configuration.pasture_get_lost": "Pokémon podem se perder",
+  "cobblemon_ecosystems.name.villager": "%s, o %s",
+  "cobblemon_ecosystems.name.pet": "%1$s do %2$s",
+  "cobblemon_ecosystems.name.witch": "Bruxa do Pântano",
+  "cobblemon_ecosystems.name.hint": "Shift + clique direito ou %s para batalhar",
+  "cobblemon_ecosystems.configuration.name_tags": "Nomes com ícones",
+  "cobblemon_ecosystems.configuration.villager_names": "Nomes dos aldeões"
 }

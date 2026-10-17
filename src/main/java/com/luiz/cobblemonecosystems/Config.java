@@ -25,7 +25,8 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue VILLAGE_GUARDIANS;
     public static final ModConfigSpec.BooleanValue VILLAGER_POKEMON;
     public static final ModConfigSpec.DoubleValue VILLAGER_ADOPT_CHANCE;
-    public static final ModConfigSpec.BooleanValue VILLAGER_BATTLES;
+    public static final ModConfigSpec.BooleanValue VILLAGER_BATTLES, NAME_TAGS;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> VILLAGER_NAMES;
     // ----- Mercador -----
     public static final ModConfigSpec.BooleanValue TRADER_POKEMON;
     public static final ModConfigSpec.BooleanValue TRADER_BATTLE;
@@ -54,7 +55,7 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue HABITAT;
     public static final ModConfigSpec.IntValue HABITAT_RADIUS;
     public static final ModConfigSpec.EnumValue<Habitat.TypeRule> HABITAT_TYPE_RULE;
-    public static final ModConfigSpec.BooleanValue HABITAT_PARTICLES;
+    public static final ModConfigSpec.BooleanValue HABITAT_PARTICLES, PASTURE_GET_LOST;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> HABITAT_FEATURES, HABITAT_PREFERENCES;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> HOMEBODY_NATURES, EXPLORER_NATURES;
     public static final ModConfigSpec.BooleanValue PASTURE_FARMS_ON, GUIDE_BOOK;
@@ -154,6 +155,17 @@ public final class Config {
                 "\"any\" is the pool any villager may get (20% of the time), and \"*\" inside a profession means \"pick from any\".",
                 "Pokémon dos aldeões por profissão. \"baby\" = aldeão criança, \"any\" = qualquer aldeão (20% das vezes),",
                 "\"*\" = sortear do \"any\".");
+        NAME_TAGS = BUILDER.comment(
+                "Villagers with Pokémon get a name (\"Ash, the Armorer\") and their Pokémon too (\"Ash's Aron\"); the trader and the",
+                "swamp hut witch get one too. Names show up when you look at them, with an icon.",
+                "Aldeões com Pokémon ganham nome (\"Ash, o Armeiro\") e o Pokémon também (\"Aron do Ash\"); o mercador e a bruxa",
+                "da cabana também. O nome aparece ao olhar para eles, com um ícone.")
+                .define("name_tags", true);
+        VILLAGER_NAMES = list("villager_names", List.of("Ash", "Misty", "Brock", "Dawn", "May", "Iris", "Cilan", "Serena", "Clemont",
+                        "Lana", "Kiawe", "Mallow", "Hop", "Leon", "Sonia", "Nemona", "Arven", "Penny", "Ana", "Bruno", "Clara", "Davi",
+                        "Elisa", "Felipe", "Gabi", "Hugo", "Isis", "João", "Lia", "Marcos", "Nina", "Otto", "Pietra", "Rafa", "Sofia",
+                        "Teo", "Vera", "Yuri", "Zoe", "Alex", "Sam", "Robin", "Kai", "Noa", "Luca", "Mila"),
+                "Names for the villagers with Pokémon. / Nomes para os aldeões com Pokémon.");
         HEAD_RIDERS = list("head_riders", List.of("pichu", "pidgey", "natu", "rowlet", "togepi"),
                 "Small partners that ride on the villager's head. / Pokémon pequenos que andam na cabeça do aldeão.");
         BUILDER.pop();
@@ -255,6 +267,12 @@ public final class Config {
                 "Happy Pokémon show green sparkles now and then; uncomfortable or lost ones shed tears.",
                 "Pokémon felizes soltam brilhos verdes de vez em quando; desconfortáveis ou perdidos choram.")
                 .define("habitat_particles", true);
+        PASTURE_GET_LOST = BUILDER.comment(
+                "A Pokémon that can't find its way home gets lost: it gets sad, its owner gets a message with where it is, and",
+                "it follows the owner home once found. Off: it is teleported home instead.",
+                "Pokémon que não acha o caminho de casa se perde: fica triste, o dono recebe um aviso com onde ele está, e ele",
+                "segue o dono até em casa quando é encontrado. Desligado: é teleportado para casa.")
+                .define("pasture_get_lost", true);
         HABITAT_FEATURES = list("habitat_features", List.of(
                         "heat:6 = minecraft:lava, minecraft:magma_block, minecraft:fire, #minecraft:campfires, minecraft:netherrack",
                         "water:12 = minecraft:water, minecraft:bubble_column, minecraft:lily_pad, minecraft:seagrass, minecraft:tall_seagrass, "

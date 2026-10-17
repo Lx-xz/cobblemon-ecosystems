@@ -94,6 +94,14 @@ public class VillagerBattles {
         if (event.getHand() == InteractionHand.MAIN_HAND) challenge(player, villager, null);
     }
 
+    /** Desafio pela tecla R ({@link ChallengeRequest}). Devolve true se o alvo era um aldeão com Pokémon. */
+    static boolean tryChallenge(ServerPlayer player, Entity target) {
+        if (!Config.VILLAGER_BATTLES.get() || !(target instanceof Villager villager)
+                || !villager.getPersistentData().hasUUID(VillagerCompanions.COMPANION_KEY)) return false;
+        challenge(player, villager, null);
+        return true;
+    }
+
     /** Eventos do Cobblemon; chamado no construtor do mod. */
     static void registerCobblemonEvents() {
         // R mirando no Pokémon do aldeão abriria uma batalha selvagem: vira desafio ao aldeão (ou recusa).

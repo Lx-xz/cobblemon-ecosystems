@@ -309,6 +309,7 @@ public class VillagerCompanions {
         if (!level.addFreshEntity(pokemon)) return;
 
         villager.getPersistentData().putUUID(COMPANION_KEY, pokemon.getUUID());
+        NameTags.onAdopted(villager, pokemon);
         villager.getPersistentData().putLong(PET_SEEN_KEY, level.getDayTime());
         rollTeam(villager, personality, species, random);
         companions.add(pokemon);

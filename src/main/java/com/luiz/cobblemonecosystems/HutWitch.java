@@ -138,7 +138,7 @@ public class HutWitch {
         }
     }
 
-    private static boolean isHutWitch(Entity entity) {
+    static boolean isHutWitch(Entity entity) {
         return entity instanceof Witch && entity.getPersistentData().getBoolean(HUT_KEY);
     }
 
@@ -317,6 +317,13 @@ public class HutWitch {
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
         if (event.getHand() == InteractionHand.MAIN_HAND) challenge(player, witch, null);
+    }
+
+    /** Desafio pela tecla R ({@link ChallengeRequest}). Devolve true se o alvo era a bruxa da cabana. */
+    static boolean tryChallenge(ServerPlayer player, Entity target) {
+        if (!Config.WITCH_BATTLE.get() || !(target instanceof Witch witch) || !isHutWitch(witch)) return false;
+        challenge(player, witch, null);
+        return true;
     }
 
     /** Eventos do Cobblemon; chamado no construtor do mod. */

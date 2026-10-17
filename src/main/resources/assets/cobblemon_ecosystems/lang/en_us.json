@@ -93,7 +93,7 @@
   "cobblemon_ecosystems.habitat.dislikes": "Dislikes: %s",
   "cobblemon_ecosystems.habitat.space": "Space: %s floor blocks per Pokémon",
   "cobblemon_ecosystems.habitat.cramped": " (cramped)",
-  "cobblemon_ecosystems.habitat.lost": "It got lost outside its habitat a while ago and is sad.",
+  "cobblemon_ecosystems.habitat.lost": "It is lost! Go get it: get close and it will follow you home.",
   "cobblemon_ecosystems.habitat.empty": "The Pasture Block has no free space around it: the habitat is empty.",
   "cobblemon_ecosystems.habitat.group.heat": "Heat",
   "cobblemon_ecosystems.habitat.group.water": "Water",
@@ -155,5 +155,14 @@
   "cobblemon_ecosystems.habitat.farm.biome_log": "Wood of the biome",
   "cobblemon_ecosystems.habitat.group.trees": "Trees",
   "cobblemon_ecosystems.guide.farm.near": "(with %s)",
-  "cobblemon_ecosystems.configuration.biome_logs": "Wood of each biome"
+  "cobblemon_ecosystems.configuration.biome_logs": "Wood of each biome",
+  "cobblemon_ecosystems.habitat.got_lost": "Your %s got lost and can't find its way home. It is near %s, %s, %s.",
+  "cobblemon_ecosystems.habitat.back_home": "%s is back home!",
+  "cobblemon_ecosystems.configuration.pasture_get_lost": "Pokémon can get lost",
+  "cobblemon_ecosystems.name.villager": "%s the %s",
+  "cobblemon_ecosystems.name.pet": "%2$s's %1$s",
+  "cobblemon_ecosystems.name.witch": "Swamp Witch",
+  "cobblemon_ecosystems.name.hint": "Sneak + right-click or %s to battle",
+  "cobblemon_ecosystems.configuration.name_tags": "Names with icons",
+  "cobblemon_ecosystems.configuration.villager_names": "Villager names"
 }

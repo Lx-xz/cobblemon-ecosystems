@@ -5,7 +5,45 @@
       "file": "cobblemon_ecosystems:font/village.png",
       "ascent": 7,
       "height": 8,
-      "chars": [""]
+      "chars": [
+        "\ue000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "cobblemon_ecosystems:font/pokeball.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "cobblemon_ecosystems:font/witch_hat.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "cobblemon_ecosystems:font/backpack.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "cobblemon_ecosystems:font/star.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\ue004"
+      ]
     }
   ]
 }

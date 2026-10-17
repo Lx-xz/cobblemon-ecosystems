@@ -71,6 +71,13 @@ public class TraderBattle {
         if (event.getHand() == InteractionHand.MAIN_HAND) challenge(player, trader, null);
     }
 
+    /** Desafio pela tecla R ({@link ChallengeRequest}). Devolve true se o alvo era o mercador. */
+    static boolean tryChallenge(ServerPlayer player, Entity target) {
+        if (!Config.TRADER_BATTLE.get() || !(target instanceof WanderingTrader trader)) return false;
+        challenge(player, trader, null);
+        return true;
+    }
+
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         for (Challenge c : List.copyOf(pendingChallenges)) challenge(c.player(), c.trader(), c.leadingPokemon());

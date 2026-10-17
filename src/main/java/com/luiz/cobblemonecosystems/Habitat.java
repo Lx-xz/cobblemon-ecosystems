@@ -44,8 +44,8 @@ public final class Habitat {
     private static final long SURVEY_TICKS = 600;
     /** Abaixo disso de chão por Pokémon, o pasto está apertado. */
     private static final int CRAMPED_AREA = 4, TIGHT_AREA = 8;
-    /** Depois de se perder (não conseguir voltar), fica triste por esse tempo (10 minutos). */
-    public static final long LOST_SADNESS_TICKS = 12000;
+    /** Perdido (não achou o caminho de casa): fica triste até voltar. Quando se perdeu, para tentar de novo. */
+    public static final String LOST_KEY = CobblemonEcosystems.MOD_ID + ":lost";
     public static final String LOST_AT_KEY = CobblemonEcosystems.MOD_ID + ":lost_at";
 
     /** Os grupos prontos, calculados (0 a 1) em vez de contados. */
@@ -249,8 +249,7 @@ public final class Habitat {
         if (area < CRAMPED_AREA) score -= 0.4f;
         else if (area < TIGHT_AREA) score -= 0.2f;
 
-        long lostAt = pokemon.getPersistentData().getLong(LOST_AT_KEY);
-        boolean lost = lostAt > 0 && level.getGameTime() - lostAt < LOST_SADNESS_TICKS;
+        boolean lost = pokemon.getPersistentData().getBoolean(LOST_KEY);
         if (lost) score -= 0.5f;
 
         Comfort comfort = score >= 0.7f ? Comfort.HAPPY : score >= 0.35f ? Comfort.COMFORTABLE
