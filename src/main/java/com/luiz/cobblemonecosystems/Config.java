@@ -156,16 +156,16 @@ public final class Config {
                 "Pokémon dos aldeões por profissão. \"baby\" = aldeão criança, \"any\" = qualquer aldeão (20% das vezes),",
                 "\"*\" = sortear do \"any\".");
         NAME_TAGS = BUILDER.comment(
-                "Villagers with Pokémon get a name (\"Ash, the Armorer\") and their Pokémon too (\"Ash's Aron\"); the trader and the",
-                "swamp hut witch get one too. Names show up when you look at them, with an icon.",
-                "Aldeões com Pokémon ganham nome (\"Ash, o Armeiro\") e o Pokémon também (\"Aron do Ash\"); o mercador e a bruxa",
-                "da cabana também. O nome aparece ao olhar para eles, com um ícone.")
+                "Villagers get a first name (with a Poké Ball icon if they have a Pokémon), used in battles too; the trader and the",
+                "swamp hut witch get one too. Names show up when you look at them.",
+                "Aldeões ganham um primeiro nome (com uma Pokébola se têm Pokémon), usado também nas batalhas; o mercador e a",
+                "bruxa da cabana também. O nome aparece ao olhar para eles.")
                 .define("name_tags", true);
         VILLAGER_NAMES = list("villager_names", List.of("Ash", "Misty", "Brock", "Dawn", "May", "Iris", "Cilan", "Serena", "Clemont",
                         "Lana", "Kiawe", "Mallow", "Hop", "Leon", "Sonia", "Nemona", "Arven", "Penny", "Ana", "Bruno", "Clara", "Davi",
                         "Elisa", "Felipe", "Gabi", "Hugo", "Isis", "João", "Lia", "Marcos", "Nina", "Otto", "Pietra", "Rafa", "Sofia",
                         "Teo", "Vera", "Yuri", "Zoe", "Alex", "Sam", "Robin", "Kai", "Noa", "Luca", "Mila"),
-                "Names for the villagers with Pokémon. / Nomes para os aldeões com Pokémon.");
+                "Names for the villagers. / Nomes para os aldeões.");
         HEAD_RIDERS = list("head_riders", List.of("pichu", "pidgey", "natu", "rowlet", "togepi"),
                 "Small partners that ride on the villager's head. / Pokémon pequenos que andam na cabeça do aldeão.");
         BUILDER.pop();

@@ -321,8 +321,13 @@ public class VillagerBattles {
 
     // ----- Utilidades -----
 
-    /** Nome do aldeão na batalha e no chat: a profissão ("Armeiro"), traduzida pelo próprio Minecraft. */
+    /**
+     * Nome do aldeão na batalha e no chat: o primeiro nome dele ({@link NameTags}); sem nome, a profissão ("Armeiro"),
+     * traduzida pelo próprio Minecraft. (É usado como chave de tradução: um nome que não é chave aparece como está.)
+     */
     private static String nameKey(Villager villager) {
+        String name = NameTags.firstName(villager);
+        if (!name.isEmpty()) return name;
         VillagerProfession profession = villager.getVillagerData().getProfession();
         return profession == VillagerProfession.NONE ? "entity.minecraft.villager" : "entity.minecraft.villager." + profession.name();
     }

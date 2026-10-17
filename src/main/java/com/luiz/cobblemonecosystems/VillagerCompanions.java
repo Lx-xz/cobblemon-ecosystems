@@ -68,6 +68,10 @@ public class VillagerCompanions {
     private static final double DEFEND_RANGE = 10;
     /** Chance, a cada 2 segundos com os dois perto, de o aldeão fazer carinho no Pokémon. */
     private static final float PET_CHANCE = 1f / 12;
+    /** Chance, a cada 2 segundos, de quem anda na cabeça descer para andar um pouco (em média a cada ~2 minutos). */
+    private static final float HEAD_HOP_CHANCE = 1f / 60;
+    /** No Pokémon: fica no chão até essa hora (30 a 90 s depois de descer). */
+    private static final String OFF_HEAD_UNTIL_KEY = CobblemonEcosystems.MOD_ID + ":off_head_until";
 
     /** Na lista villager_partners: "baby" é para criança, "any" é o grupo de qualquer aldeão e "*" sorteia do "any". */
     private static final String BABY = "baby", ANY = "any", FROM_ANY = "*";
@@ -206,8 +210,14 @@ public class VillagerCompanions {
             villager.getPersistentData().putLong(PET_SEEN_KEY, level.getDayTime());
             if (pokemon.isBusy() || Hunts.isHunting(pokemon)) return false;
             if (defend(villager, pokemon)) return false;
-            // Quem anda na cabeça desceu para lutar: sobe de novo quando estiver perto.
-            if (!pokemon.isPassenger() && ridesOnHead(PokemonAi.species(pokemon)) && pokemon.distanceTo(villager) < 3) {
+            // Quem anda na cabeça desce de vez em quando para andar um pouco e depois sobe de novo (e também sobe de
+            // novo depois de descer para lutar), quando estiver perto.
+            long gameTime = level.getGameTime();
+            if (pokemon.isPassenger() && level.random.nextFloat() < HEAD_HOP_CHANCE) {
+                pokemon.stopRiding();
+                pokemon.getPersistentData().putLong(OFF_HEAD_UNTIL_KEY, gameTime + 600 + level.random.nextInt(1200));
+            } else if (!pokemon.isPassenger() && ridesOnHead(PokemonAi.species(pokemon)) && pokemon.distanceTo(villager) < 3
+                    && gameTime >= pokemon.getPersistentData().getLong(OFF_HEAD_UNTIL_KEY)) {
                 pokemon.startRiding(villager, true);
             }
             if (!pokemon.isPassenger()) {
