@@ -26,6 +26,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -204,7 +205,8 @@ public class StructurePokemon {
 
     /**
      * As fêmeas das aves que vieram das galinhas (selvagens, nos currais) e as fêmeas dessas espécies num pasto
-     * botam ovos de vez em quando. Machos e Pokémon seguindo o jogador não botam.
+     * botam ovos de vez em quando. Machos e Pokémon seguindo o jogador não botam. No pasto, o
+     * dono pode desligar com o botão de cesta ({@link PastureFarms#isOff}).
      */
     private static void layEggs() {
         egglayers.removeIf(Entity::isRemoved);
@@ -213,13 +215,15 @@ public class StructurePokemon {
             boolean fromChicken = "minecraft:chicken".equals(pokemon.getPersistentData().getString(SOURCE_KEY));
             boolean inPen = fromChicken && PokemonAi.isWild(pokemon);
             boolean inPasture = pokemon.getTethering() != null
+                    && !PastureFarms.isOff(pokemon)
                     && ConfigLists.species(Config.EGG_LAYING_SPECIES).contains(PokemonAi.species(pokemon));
             if (pokemon.isBusy() || (!inPen && !inPasture) || pokemon.getPokemon().getGender() != Gender.FEMALE) continue;
             var data = pokemon.getPersistentData();
             long now = pokemon.level().getGameTime();
             if (!data.contains(NEXT_EGG_KEY)) data.putLong(NEXT_EGG_KEY, now + nextEggDelay(pokemon.getRandom()));
             if (now < data.getLong(NEXT_EGG_KEY)) continue;
-            pokemon.spawnAtLocation(Items.EGG);
+            if (inPasture) PastureFarms.deliver(pokemon, new ItemStack(Items.EGG));
+            else pokemon.spawnAtLocation(Items.EGG);
             pokemon.level().playSound(null, pokemon.getX(), pokemon.getY(), pokemon.getZ(), SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL,
                     1f, (pokemon.getRandom().nextFloat() - pokemon.getRandom().nextFloat()) * 0.2f + 1f);
             data.putLong(NEXT_EGG_KEY, now + nextEggDelay(pokemon.getRandom()));

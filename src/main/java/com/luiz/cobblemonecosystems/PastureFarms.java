@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cobblemon.mod.common.api.types.ElementalType;
+import com.cobblemon.mod.common.block.PastureBlock;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import com.cobblemon.mod.common.pokemon.Gender;
 import com.luiz.cobblemonecosystems.ConfigLists.BlockGroup;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -21,6 +24,11 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 /**
  * Farms passivas do pasto: alguns Pokémon soltam um item de tempos em tempos, sem o jogador fazer nada, desde que
@@ -28,7 +36,8 @@ import net.minecraft.world.item.Items;
  * rápido. As farms vêm da lista {@code pasture_farms} da configuração, por exemplo:
  * {@code "type:fire = minecraft:blaze_powder, every:10, on:heat"} (quem = item, a cada X minutos, pisando em) ou
  * {@code "bibarel = from:biome_log, every:15, near:water, near:trees"} (a madeira do bioma, se o habitat tiver água e
- * árvores). Quem pode ser uma espécie ("bibarel") ou um tipo ("type:fire"). O Pokémon não quebra nada: só solta o item.
+ * árvores). Quem pode ser uma espécie ("bibarel") ou um tipo ("type:fire"). O Pokémon não quebra nada: só solta o item,
+ * ou o põe num container encostado no bloco do pasto ({@link #deliver}).
  *
  * Não repetimos o que o Cobblemon 1.8 já dá por interação com item na mão (escova, balde, farinha de osso...).
  */
@@ -38,6 +47,8 @@ public final class PastureFarms {
     /** Feliz produz nesse tempo em relação ao normal. */
     private static final float HAPPY_SPEED = 0.6f;
     private static final String NEXT_KEY = CobblemonEcosystems.MOD_ID + ":farm_next";
+    /** No Pokémon (não na entidade), para valer de novo quando ele voltar ao pasto: o dono desligou a coleta. */
+    private static final String OFF_KEY = CobblemonEcosystems.MOD_ID + ":farm_off";
 
     /** Item "da floresta": a madeira do bioma do pasto, pela lista {@code biome_logs}. */
     private static final String BIOME_LOG = "from:biome_log";
@@ -58,8 +69,8 @@ public final class PastureFarms {
         }
     }
 
-    /** Por que a farm está parada (ou READY se está produzindo). */
-    public enum Status { READY, NOT_COMFORTABLE, NOT_NEAR, NOT_ON_BLOCK, NOT_IN_FOREST }
+    /** Por que a farm está parada (ou READY se está produzindo). OFF: o dono desligou a coleta (botão de cesta). */
+    public enum Status { READY, OFF, NOT_COMFORTABLE, NOT_NEAR, NOT_ON_BLOCK, NOT_IN_FOREST }
 
     /**
      * A farm de um Pokémon, como ela está, o que falta ({@code missing}: o grupo de near/on), o item que sai ali
@@ -127,7 +138,9 @@ public final class PastureFarms {
         Status status = Status.READY;
         String missing = null;
         Item item = farm.item() != null ? farm.item() : biomeLog(pokemon);
-        if (report == null || report.comfort().ordinal() < Habitat.Comfort.COMFORTABLE.ordinal()) {
+        if (isOff(pokemon)) {
+            status = Status.OFF;
+        } else if (report == null || report.comfort().ordinal() < Habitat.Comfort.COMFORTABLE.ordinal()) {
             status = Status.NOT_COMFORTABLE;
         } else if ((missing = missingNear(pokemon, farm)) != null) {
             status = Status.NOT_NEAR;
@@ -142,6 +155,33 @@ public final class PastureFarms {
         long next = pokemon.getPersistentData().getLong(NEXT_KEY);
         long left = next == 0 ? minutes * 1200L : next - pokemon.level().getGameTime();
         return new State(farm, status, missing, item, (int) Math.max(0, (left + 1199) / 1200), minutes);
+    }
+
+    /**
+     * Este Pokémon do pasto produz algo que o botão de cesta controla: uma farm daqui ou ovos (fêmeas das espécies de
+     * {@code egg_laying_species}, em {@link StructurePokemon}).
+     */
+    public static boolean collects(PokemonEntity pokemon) {
+        if (pokemon.getTethering() == null) return false;
+        if (Config.PASTURE_FARMS_ON.get() && farmOf(pokemon) != null) return true;
+        return Config.EGG_LAYERS.get() && pokemon.getPokemon().getGender() == Gender.FEMALE
+                && ConfigLists.species(Config.EGG_LAYING_SPECIES).contains(PokemonAi.species(pokemon));
+    }
+
+    /** O dono desligou a coleta deste Pokémon? */
+    public static boolean isOff(PokemonEntity pokemon) {
+        return pokemon.getPokemon().getPersistentData().getBoolean(OFF_KEY);
+    }
+
+    /**
+     * Liga ou desliga a coleta. Ao religar, a contagem recomeça do zero (o item não sai na hora só porque o tempo
+     * correu enquanto estava desligada).
+     */
+    public static void setOff(PokemonEntity pokemon, boolean off) {
+        if (off) pokemon.getPokemon().getPersistentData().putBoolean(OFF_KEY, true);
+        else pokemon.getPokemon().getPersistentData().remove(OFF_KEY);
+        pokemon.getPersistentData().remove(NEXT_KEY);
+        pokemon.getPokemon().onChange(null);
     }
 
     /** O primeiro grupo de {@code near} que o habitat não tem (ao menos 1/4 do que conta inteiro), ou null. */
@@ -188,6 +228,30 @@ public final class PastureFarms {
         return false;
     }
 
+    /**
+     * Entrega o que o Pokémon do pasto produziu: vai para um container encostado no bloco do pasto (baú, barril ou
+     * de outro mod, pelo item handler do NeoForge); o que não couber, ou sem container, cai no chão perto dele.
+     */
+    public static void deliver(PokemonEntity pokemon, ItemStack stack) {
+        if (pokemon.getTethering() != null) {
+            Level level = pokemon.level();
+            BlockPos pasture = pokemon.getTethering().getPasturePos();
+            BlockState state = level.getBlockState(pasture);
+            BlockPos other = state.getBlock() instanceof PastureBlock block
+                    ? block.getPositionOfOtherPart(state, pasture) : pasture.above();
+            for (BlockPos part : List.of(pasture, other)) {
+                for (Direction dir : Direction.values()) {
+                    BlockPos pos = part.relative(dir);
+                    if (pos.equals(pasture) || pos.equals(other)) continue;
+                    IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, dir.getOpposite());
+                    if (handler != null) stack = ItemHandlerHelper.insertItemStacked(handler, stack, false);
+                    if (stack.isEmpty()) return;
+                }
+            }
+        }
+        pokemon.spawnAtLocation(stack);
+    }
+
     /** Chamado pelo {@link PastureReturn} a cada tick de cada Pokémon do pasto (dentro da área). */
     static void tick(PokemonEntity pokemon, ServerLevel level) {
         if (!Config.PASTURE_FARMS_ON.get() || (level.getGameTime() + pokemon.getId()) % CHECK_TICKS != 0 || pokemon.isBusy()) return;
@@ -202,7 +266,7 @@ public final class PastureFarms {
         if (now < data.getLong(NEXT_KEY) || state.status() != Status.READY) return;
 
         Farm farm = state.farm();
-        pokemon.spawnAtLocation(new ItemStack(state.item(), farm.count()));
+        deliver(pokemon, new ItemStack(state.item(), farm.count()));
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pokemon.getX(), pokemon.getY() + pokemon.getBbHeight() * 0.6, pokemon.getZ(),
                 6, pokemon.getBbWidth() / 2, pokemon.getBbHeight() / 3, pokemon.getBbWidth() / 2, 0);
         level.playSound(null, pokemon.getX(), pokemon.getY(), pokemon.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.NEUTRAL, 0.4f, 0.8f);

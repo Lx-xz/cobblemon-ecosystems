@@ -96,6 +96,7 @@ public final class HabitatScan {
         if (farm != null) {
             MutableComponent status = switch (farm.status()) {
                 case READY -> Component.translatable(KEY + "farm.ready", farm.minutesLeft()).withStyle(ChatFormatting.GREEN);
+                case OFF -> Component.translatable(KEY + "farm.off").withStyle(ChatFormatting.YELLOW);
                 case NOT_COMFORTABLE -> Component.translatable(KEY + "farm.not_comfortable").withStyle(ChatFormatting.RED);
                 case NOT_NEAR -> Component.translatable(KEY + "farm.not_near",
                         Component.translatableWithFallback(KEY + "group." + farm.missing(), farm.missing())).withStyle(ChatFormatting.RED);
