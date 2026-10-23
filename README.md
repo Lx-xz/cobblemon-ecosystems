@@ -15,7 +15,7 @@ Pokémon are the animals — and the plants, and the creatures of the wild. This
 - **Config file** (`config/cobblemon_ecosystems-common.toml`, commented in English and Portuguese): choose to remove passive animals, hostile animals (spiders, hoglins) and/or slimes, and turn each feature on or off
 - **In-game config screen**: Mods → Cobblemon Ecosystems → Config, with translated names
 - **Editable lists**: data tags (`removed_animals`, `removed_hostile_animals`, `removed_slimes`) you can change with a datapack, plus lists in the config for the removed mobs, the Pokémon of each village pen, villager partners, head riders, nests, infested blocks, outpost captives, the witch's team, egg-laying species and dog, wolf and sheep Pokémon. Weights set how common each one is
-- **Villages with Pokémon, by biome**: pen and stable animals become Pokémon that fit the village
+- **Villages with Pokémon, by biome**: pen and stable animals become Pokémon that fit the village, one kind per pen (only cows, only pigs, only birds...), and every pen gets 2 or 3
   - Horses: Mudbray (plains), Ponyta (desert), Blitzle (savanna), Stantler (snowy), Deerling (taiga)
   - Cows, pigs, sheep and cats too: Miltank, Tauros, Bouffalant, Lechonk, Spoink, Tepig, Swinub, Wooloo, Mareep, Skiddo, Meowth, Litleo, Shinx, Glameow, Sneasel, Purrloin, Skitty, Espurr
   - One species per village, with rarer species less likely; 20% chance of an evolved form
@@ -86,7 +86,7 @@ Os Pokémon são os animais, e também as plantas e as criaturas selvagens. Este
 - **Arquivo de configuração** (`config/cobblemon_ecosystems-common.toml`, comentado em inglês e português): escolha remover animais passivos, animais hostis (aranhas, hoglins) e/ou slimes, e ligue ou desligue cada recurso
 - **Tela de configuração no jogo**: Mods → Cobblemon Ecosystems → Config, com nomes traduzidos
 - **Listas editáveis**: tags (`removed_animals`, `removed_hostile_animals`, `removed_slimes`) que podem ser mudadas por datapack, e listas na configuração para os mobs removidos, os Pokémon de cada curral, os parceiros dos aldeões, quem anda na cabeça, ninhos, blocos infestados, Pokémon presos nos postos, o time da bruxa, espécies que botam ovos e os Pokémon cachorro, lobo e ovelha. Os pesos dizem o quanto cada um é comum
-- **Vilas com Pokémon, por bioma**: animais dos currais e estábulos viram Pokémon que combinam com a vila
+- **Vilas com Pokémon, por bioma**: animais dos currais e estábulos viram Pokémon que combinam com a vila, um tipo por curral (só vacas, só porcos, só aves...), e todo curral tem 2 ou 3
   - Cavalos: Mudbray (planície), Ponyta (deserto), Blitzle (savana), Stantler (neve), Deerling (taiga)
   - Vacas, porcos, ovelhas e gatos também: Miltank, Tauros, Bouffalant, Lechonk, Spoink, Tepig, Swinub, Wooloo, Mareep, Skiddo, Meowth, Litleo, Shinx, Glameow, Sneasel, Purrloin, Skitty, Espurr
   - Uma espécie por vila, com as mais raras menos prováveis; 20% de chance de vir evoluído

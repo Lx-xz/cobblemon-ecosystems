@@ -15,6 +15,9 @@
   - Bibarel with water, earth and trees in the habitat: a log of the forest biome's wood every 15 min (birch in birch forests, spruce in taigas, dark oak in dark forests...)
   - Bidoof with water and trees: 2 sticks every 10 min
   - The habitat report shows what each Pokémon produces, when, and what is missing
+  - **Collected automatically**: a chest, barrel, hopper or modded container touching the Pasture Block receives the items and eggs; what doesn't fit drops on the ground
+  - **Collecting on/off for each Pokémon** (farm and eggs): a basket button in the interaction wheel; the choice stays with the Pokémon, even in the PC
+  - The house and basket buttons only show up for pastured Pokémon, not party ones
 - **Habitats book**: every player gets a book on first join with how habitats work and a page per type with what it likes and dislikes
 - **Pasture habitats**: the space Pokémon can reach around the Pasture Block (up to 10 blocks, walls and fences close it) is their home
   - Each type likes and dislikes some surroundings: Fire likes lava and magma and dislikes water, Water likes a pool, Grass likes plants and open sky, Steel likes iron blocks... Some species have their own taste (Zubat and Woobat like darkness and a roof)
@@ -38,6 +41,7 @@
 - **Editable lists in the config**: which mobs are removed (ids, tags and exceptions), the Pokémon of each village pen by village type, villager partners by profession, head riders, spider nests, infested blocks, outpost captives, the witch's team, egg-laying species, and dog, wolf and sheep Pokémon. Weights set how common each one is
 
 ### Changed
+- **Village pens always have Pokémon, one kind per pen**: vanilla mixed the animals, sometimes put 6 in a pen and often left pens empty. Now every pen gets 2 Pokémon (3 in the big ones) of a single kind (only cows, only pigs...), drawn per pen. Chickens (egg-laying birds) show up in pens too, stables only hold horses, and butcher pens never get horses
 - Only **female** birds lay eggs
 - Only **wolf** Pokémon (Poochyena, Mightyena, Lycanroc) hunt wild sheep Pokémon; other dogs only hunt skeletons
 - The wandering trader no longer sells pufferfish and tropical fish buckets while those fish are removed
@@ -58,6 +62,9 @@
   - Bibarel com água, terra e árvores no habitat: um tronco da madeira do bioma a cada 15 min (bétula nas florestas de bétula, abeto nas taigas, carvalho-escuro na floresta escura...)
   - Bidoof com água e árvores: 2 gravetos a cada 10 min
   - O relatório do habitat mostra o que cada Pokémon produz, quando, e o que está faltando
+  - **Coleta automática**: um baú, barril, funil ou container de outro mod encostado no bloco do pasto recebe os itens e os ovos; o que não couber cai no chão
+  - **Liga/desliga a coleta de cada Pokémon** (farm e ovos): botão de cesta no menu radial; a escolha fica no Pokémon, mesmo no PC
+  - Os botões de casinha e de cesta só aparecem para Pokémon do pasto, não para os da party
 - **Livro dos habitats**: cada jogador ganha um livro ao entrar no mundo pela primeira vez, com como funcionam os habitats e uma página por tipo com do que ele gosta e não gosta
 - **Habitats do pasto**: o espaço que os Pokémon alcançam em volta do bloco do pasto (até 10 blocos, paredes e cercas fecham) é a casa deles
   - Cada tipo gosta e não gosta de certas coisas em volta: Fogo gosta de lava e magma e não gosta de água, Água gosta de uma piscina, Planta gosta de plantas e céu aberto, Metal gosta de blocos de ferro... Algumas espécies têm gosto próprio (Zubat e Woobat gostam de escuro e de teto)
@@ -81,6 +88,7 @@
 - **Listas editáveis na configuração**: quais mobs saem (ids, tags e exceções), os Pokémon de cada curral por tipo de vila, os Pokémon dos aldeões por profissão, quem anda na cabeça, ninhos de aranha, blocos infestados, Pokémon presos nos postos, o time da bruxa, espécies que botam ovos e os Pokémon cachorro, lobo e ovelha. Os pesos dizem o quanto cada um é comum
 
 ### Mudanças
+- **Currais das vilas sempre com Pokémon, um tipo por curral**: o vanilla misturava os animais, às vezes punha 6 num curral e muitas vezes deixava currais vazios. Agora todo curral tem 2 Pokémon (3 nos grandes) de um tipo só (só vacas, só porcos...), sorteado por curral. Galinhas (aves que botam ovos) também aparecem nos currais, estábulos só têm cavalos e o curral do açougueiro nunca tem cavalos
 - Só as **fêmeas** das aves botam ovos
 - Só os Pokémon **lobo** (Poochyena, Mightyena, Lycanroc) caçam Pokémon ovelha selvagens; os outros cachorros só caçam esqueletos
 - O mercador ambulante não vende mais balde de baiacu nem de peixe tropical enquanto esses peixes estiverem removidos

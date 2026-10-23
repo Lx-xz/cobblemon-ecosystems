@@ -51,15 +51,15 @@ def basket():
 
 
 def crossed(im):
-    """Traço na diagonal (de cima à esquerda até embaixo à direita), com uma borda vazia para destacar."""
+    """Traço grosso na diagonal (de baixo à esquerda até em cima à direita), com uma borda vazia para destacar."""
     im = im.copy()
-    for y in range(1, 31):
-        for x in range(1, 31):
-            d = abs(x - y)
-            if d <= 1:
-                im.putpixel((x, y), (255, 255, 255, 255))
-            elif d <= 3:
+    for y in range(32):
+        for x in range(32):
+            d = abs((x + 0.5) + (y + 0.5) - 32) / 1.4142
+            if d <= 3.6:
                 im.putpixel((x, y), (255, 255, 255, 0))
+            if d <= 2.0 and 2 <= x <= 29 and 2 <= y <= 29:
+                im.putpixel((x, y), (255, 255, 255, 255))
     return im
 
 

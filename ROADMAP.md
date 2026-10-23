@@ -128,17 +128,7 @@ O Cobblemon já dá anfibrilho ao derrotar Froakie, Frogadier, Greninja, Politoe
 
 ## 4. Fazendas no pasto (Pasture Block do Cobblemon)
 
-Produção lenta, com tempo de espera. Talvez exija o Pokémon feliz ou alimentado.
-
-- [ ] **Aranhas** (Spinarak, Ariados, Joltik, Galvantula): teias nos cantos e linha
-- [ ] **Gelatinosos** (Solosis, Grimer, Goomy): slimeball
-- [ ] **Magcargo e Slugma**: pedra em volta vira bloco de magma
-- [ ] **Snorunt e Vanillite**: neve e gelo em volta
-- [ ] **Shuckle**: fermenta frutas guardadas e faz Suco de Fruta
-- [ ] **Clamperl e Shellder**: pérolas, cristais de prismarinho
-- [ ] **Tropius**: fruta no pescoço para colher
-- [ ] **Gastly e Haunter**: membrana de phantom de vez em quando à noite
-- [ ] **Sableye e Carbink**: minérios pequenos (cuidado com balanceamento)
+As ideias de farms, a regra que elas seguem e o que já está feito ficam em [docs/farms.md](docs/farms.md).
 
 ---
 
